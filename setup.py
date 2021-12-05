@@ -2,9 +2,10 @@ import setuptools
 
 setuptools.setup(
       name='confident',
-      version='0.0.1',
+      version='0.0.2',
       description='Loading configurations from multiple sources into a data model.',
       long_description=open('README.md').read(),
+      long_description_content_type='text/markdown',
       url='https://github.com/limonyellow/confident',
       author='limonyellow',
       author_email='lemon@example.com',

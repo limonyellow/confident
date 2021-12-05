@@ -16,7 +16,7 @@ class MyAppConfig(Confident):
     host: str = 'localhost'
 
 
-# Illustrate some environment variables.
+# Illustrates some environment variables.
 os.environ['name'] = 'my_name' 
 os.environ['host'] = '127.0.0.1'
 
@@ -40,3 +40,6 @@ To contribute to Confident, please make sure that any new features or changes to
 ### Creating Distribution
 Build the distribution:  
 ```python3 setup.py sdist```
+
+Upload to pypi:  
+```twine upload dist/*```
