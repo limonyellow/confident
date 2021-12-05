@@ -5,7 +5,7 @@ setuptools.setup(
       version='0.0.1',
       description='Loading configurations from multiple sources into a data model.',
       long_description=open('README.md').read(),
-      url='http://github.com/',
+      url='https://github.com/limonyellow/confident',
       author='limonyellow',
       author_email='lemon@example.com',
       license='MIT',
@@ -21,7 +21,5 @@ setuptools.setup(
             'pyyaml',
             'python-dotenv',
       ],
-      # package_dir={"": "src"},
-      # packages=setuptools.find_packages(where="src"),
       python_requires=">=3.6",
 )

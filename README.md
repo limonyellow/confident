@@ -9,15 +9,18 @@ import os
 from confident import Confident
 
 
+# Creating your own config class by inheriting from `Confident`.
 class MyAppConfig(Confident):
     name: str
     port: int = 5000
     host: str = 'localhost'
 
 
+# Illustrate some environment variables.
 os.environ['name'] = 'my_name' 
 os.environ['host'] = '127.0.0.1'
 
+# Creating the config object. `Confident` will insert the values of the properties.
 config = MyAppConfig()
 
 print(config.name)
