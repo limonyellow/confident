@@ -34,6 +34,22 @@ print(config)
 ## Installation
 ```pip install confident```
 
+## Capabilities
+Confident object can load config fields from multiple sources:
+1. Environment variables.
+1. Config files such as 'json' and 'yaml'.
+1. '.env' files.
+1. Explicitly given fields in the constructor level.
+1. Default values.
+
+Confident object core functionality is based on [pydantic](https://pydantic-docs.helpmanual.io/) library. 
+That means the Confident config object has all the benefits of pydantic's [BaseModel](https://pydantic-docs.helpmanual.io/usage/models/) including
+Type validation, [object transformation](https://pydantic-docs.helpmanual.io/usage/exporting_models/) and many more features.
+
+## Usage
+# Load Config files  
+
+
 ## Contributing
 To contribute to Confident, please make sure that any new features or changes to existing functionality include test coverage.
 

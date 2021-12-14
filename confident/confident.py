@@ -1,5 +1,5 @@
 import os
-from typing import Union, List, Any, Dict
+from typing import Union, List, Any, Dict, Optional
 
 from pydantic import BaseModel
 from pydantic.fields import ModelField
@@ -11,12 +11,12 @@ class ConfidentConfigSpecs(BaseModel):
     """
     A model that holds all the metadata regarding the Confident config object.
     """
-    specs_path: str = None
-    env_files: List[str] = None
-    config_files: List[str] = None
+    specs_path: Optional[str] = None
+    env_files: Optional[List[str]] = None
+    config_files: Optional[List[str]] = None
     prefer_files: bool = False
     ignore_missing_files: bool = True
-    fields: Dict['str', Any] = None
+    explicit_fields: Optional[Dict['str', Any]] = None
 
 
 class Confident(BaseModel):
@@ -31,12 +31,12 @@ class Confident(BaseModel):
 
     def __init__(
             self,
-            specs_path: str = None,
-            env_files: Union[str, List[str]] = None,
-            config_files: Union[str, List[str]] = None,
+            specs_path: Optional[str] = None,
+            env_files: Optional[Union[str, List[str]]] = None,
+            config_files: Optional[Union[str, List[str]]] = None,
             prefer_files: bool = False,
             ignore_missing_files: bool = True,
-            fields: Dict['str', Any] = None
+            fields: Optional[Dict['str', Any]] = None
     ):
         """
         Args:
@@ -46,7 +46,7 @@ class Confident(BaseModel):
                 to insert as config properties.
             config_files: File paths of 'json' or 'yaml' files to insert as config properties.
             prefer_files: In case of identical property name from different sources, whether to insert the values from
-                the files over the values from environmet variables.
+                the files over the values from environment variables.
             ignore_missing_files: Whether to skip when a given file path is not exists or to raise a matching error.
             fields: Dictionary of keys matching the object fields names to override their values.
         """
@@ -54,11 +54,11 @@ class Confident(BaseModel):
             specs = ConfidentConfigSpecs.parse_file(specs_path)
             specs.specs_path = specs_path
         else:
-            env_files = [env_files] if isinstance(env_files, str) else env_files
-            config_files = [env_files] if isinstance(config_files, str) else config_files
+            env_files = [env_files] if isinstance(env_files, str) else env_files or []
+            config_files = [config_files] if isinstance(config_files, str) else config_files or []
             specs = ConfidentConfigSpecs(specs_path=specs_path, env_files=env_files, config_files=config_files,
                                          prefer_file=prefer_files, ignore_missing_files=ignore_missing_files,
-                                         fields=fields)
+                                         explicit_fields=fields)
 
         properties = {}
         if specs.env_files:
@@ -73,8 +73,8 @@ class Confident(BaseModel):
             properties.update({**file_properties, **env_properties})
 
         # Adds explicit config fields.
-        if specs.fields:
-            properties.update(specs.values)
+        if specs.explicit_fields:
+            properties.update(specs.explicit_fields)
 
         super().__init__(ConfigSpecs=specs, **properties)
 
