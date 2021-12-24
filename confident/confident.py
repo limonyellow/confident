@@ -60,25 +60,40 @@ class Confident(BaseModel):
                                          prefer_file=prefer_files, ignore_missing_files=ignore_missing_files,
                                          explicit_fields=fields)
 
-        properties = {}
         if specs.env_files:
             load_env_files(specs.env_files)
-        env_properties = self.load_env_properties()
-        file_properties = self.load_file_properties(specs) if specs.config_files else {}
-
-        # Adds config fields by priority.
-        if specs.prefer_files:
-            properties.update({**env_properties, **file_properties})
-        else:
-            properties.update({**file_properties, **env_properties})
+        env_properties = self._load_env_properties()
+        file_properties = self._load_file_properties(specs) if specs.config_files else {}
 
         # Adds explicit config fields.
-        if specs.explicit_fields:
-            properties.update(specs.explicit_fields)
+        explicit_properties = specs.explicit_fields if specs.explicit_fields else {}
+
+        properties = self._merge_properties(specs=specs, explicit_properties=explicit_properties,
+                                            env_properties=env_properties, file_properties=file_properties)
 
         super().__init__(ConfigSpecs=specs, **properties)
 
-    def load_env_properties(self) -> Dict[str, Any]:
+    @staticmethod
+    def _merge_properties(specs, explicit_properties, env_properties, file_properties) -> Dict['str', Any]:
+        """
+        Construct a dictionary with properties from all sources according to their priority.
+        Args:
+            specs: Config specifications object.
+            explicit_properties: Fields that were given explicitly in the constructor.
+            env_properties: Fields retrieved from environment variables.
+            file_properties: Fields retrieved from files.
+
+        Returns:
+            Dictionary with all the properties together. Less important keys will be overridden by higher priority keys.
+        """
+        properties = {}
+        if specs.prefer_files:
+            properties.update({**explicit_properties, **env_properties, **file_properties})
+        else:
+            properties.update({**explicit_properties, **file_properties, **env_properties})
+        return properties
+
+    def _load_env_properties(self) -> Dict[str, Any]:
         """
         Finds and loads requested config fields from environment variables into a dictionary.
         """
@@ -90,7 +105,7 @@ class Confident(BaseModel):
                 env_properties[key] = env_value
         return env_properties
 
-    def load_file_properties(self, specs: ConfidentConfigSpecs) -> Dict[str, Any]:
+    def _load_file_properties(self, specs: ConfidentConfigSpecs) -> Dict[str, Any]:
         """
         Finds and loads requested config fields from files into a dictionary.
 
