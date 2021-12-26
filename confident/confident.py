@@ -1,6 +1,8 @@
 import os
 from typing import Union, List, Any, Dict, Optional
 
+from config_property import ConfigProperty
+from config_source import ConfigSource
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 
@@ -27,7 +29,8 @@ class Confident(BaseModel):
     - Environment variables of the operating system.
     - Config files.
     """
-    __config_specs__: ConfidentConfigSpecs
+    config_specs: ConfidentConfigSpecs
+    full_config: Dict[str, ConfigProperty]
 
     def __init__(
             self,
@@ -50,6 +53,7 @@ class Confident(BaseModel):
             ignore_missing_files: Whether to skip when a given file path is not exists or to raise a matching error.
             fields: Dictionary of keys matching the object fields names to override their values.
         """
+        # Prepare metadata.
         if specs_path:
             specs = ConfidentConfigSpecs.parse_file(specs_path)
             specs.specs_path = specs_path
@@ -60,21 +64,25 @@ class Confident(BaseModel):
                                          prefer_file=prefer_files, ignore_missing_files=ignore_missing_files,
                                          explicit_fields=fields)
 
+        # Load properties from all sources.
         if specs.env_files:
             load_env_files(specs.env_files)
         env_properties = self._load_env_properties()
-        file_properties = self._load_file_properties(specs) if specs.config_files else {}
+        file_properties = self._load_file_properties(specs)
+        explicit_properties = self._load_explicit_properties(specs)
 
-        # Adds explicit config fields.
-        explicit_properties = specs.explicit_fields if specs.explicit_fields else {}
+        full_properties = self._merge_properties(specs=specs, explicit_properties=explicit_properties,
+                                                 env_properties=env_properties, file_properties=file_properties)
 
-        properties = self._merge_properties(specs=specs, explicit_properties=explicit_properties,
-                                            env_properties=env_properties, file_properties=file_properties)
-
-        super().__init__(ConfigSpecs=specs, **properties)
+        # Create the final object.
+        super().__init__(
+            config_specs=specs,
+            full_config=full_properties,
+            **{key: config_property.value for key, config_property in full_properties.items()}
+        )
 
     @staticmethod
-    def _merge_properties(specs, explicit_properties, env_properties, file_properties) -> Dict['str', Any]:
+    def _merge_properties(specs, explicit_properties, env_properties, file_properties) -> Dict[str, Any]:
         """
         Construct a dictionary with properties from all sources according to their priority.
         Args:
@@ -93,6 +101,13 @@ class Confident(BaseModel):
             properties.update({**explicit_properties, **file_properties, **env_properties})
         return properties
 
+    @staticmethod
+    def _load_explicit_properties(specs: ConfidentConfigSpecs) -> Dict[str, Any]:
+        if not specs.explicit_fields:
+            return {}
+        return {key: ConfigProperty(name=key, value=value, source_name=ConfigSource.explicit,
+                                    source_type=ConfigSource.explicit) for key, value in specs.explicit_fields.items()}
+
     def _load_env_properties(self) -> Dict[str, Any]:
         """
         Finds and loads requested config fields from environment variables into a dictionary.
@@ -102,7 +117,8 @@ class Confident(BaseModel):
         for key in self.__config_fields__.keys():
             env_value = os.getenv(key)
             if env_value:
-                env_properties[key] = env_value
+                env_properties[key] = ConfigProperty(name=key, value=env_value, source_name=ConfigSource.environment,
+                                                     source_type=ConfigSource.environment)
         return env_properties
 
     def _load_file_properties(self, specs: ConfidentConfigSpecs) -> Dict[str, Any]:
@@ -117,7 +133,9 @@ class Confident(BaseModel):
             if not os.path.isfile(file_path) and specs.ignore_missing_files:
                 continue
             file_dict = load_config_file(path=file_path)
-            file_properties.update(file_dict)
+            file_properties.update(
+                {key: ConfigProperty(name=key, value=value, source_name=file_path,
+                                     source_type=ConfigSource.file) for key, value in file_dict.items()})
 
         return {key: file_properties[key] for key in file_properties.keys() & self.__fields__.keys()}
 
