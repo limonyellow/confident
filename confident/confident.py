@@ -107,9 +107,9 @@ class Confident(BaseModel):
         """
         properties = {}
         if specs.prefer_files:
-            properties.update({**explicit_properties, **env_properties, **file_properties, **default_properties})
+            properties.update({**default_properties, **explicit_properties, **env_properties, **file_properties})
         else:
-            properties.update({**explicit_properties, **file_properties, **env_properties, **default_properties})
+            properties.update({**default_properties, **explicit_properties, **file_properties, **env_properties})
         return properties
 
     def _load_default_properties(self) -> Dict[str, Any]:
