@@ -33,6 +33,7 @@ print(config.get_full_details())
 #> {'name': ConfigProperty(name='name', value='my_name', value_type=<class 'str'>, source_name='environment', source_type=<ConfigSource.environment: 'environment'>),  
 #> 'host': ConfigProperty(name='host', value='127.0.0.1', value_type=<class 'str'>, source_name='environment', source_type=<ConfigSource.environment: 'environment'>),  
 #> 'port': ConfigProperty(name='port', value=5000, value_type=<class 'int'>, source_name='class_default', source_type=<ConfigSource.class_default: 'class_default'>)} 
+
 ```
 
 ## Installation
