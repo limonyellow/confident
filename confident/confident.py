@@ -72,9 +72,15 @@ class Confident(BaseModel):
         env_properties = self._load_env_properties()
         file_properties = self._load_file_properties(specs)
         explicit_properties = self._load_explicit_properties(specs)
+        default_properties = self._load_default_properties()
 
-        full_properties = self._merge_properties(specs=specs, explicit_properties=explicit_properties,
-                                                 env_properties=env_properties, file_properties=file_properties)
+        full_properties = self._merge_properties(
+            specs=specs,
+            explicit_properties=explicit_properties,
+            env_properties=env_properties,
+            file_properties=file_properties,
+            default_properties=default_properties
+        )
 
         # Create the final object.
         object.__setattr__(self, SPECS_ATTR, specs)
@@ -84,7 +90,9 @@ class Confident(BaseModel):
         )
 
     @staticmethod
-    def _merge_properties(specs, explicit_properties, env_properties, file_properties) -> Dict[str, Any]:
+    def _merge_properties(
+            specs, explicit_properties, env_properties, file_properties, default_properties
+    ) -> Dict[str, Any]:
         """
         Construct a dictionary with properties from all sources according to their priority.
         Args:
@@ -92,16 +100,34 @@ class Confident(BaseModel):
             explicit_properties: Fields that were given explicitly in the constructor.
             env_properties: Fields retrieved from environment variables.
             file_properties: Fields retrieved from files.
+            default_properties: Default values in the class declaration.
 
         Returns:
             Dictionary with all the properties together. Less important keys will be overridden by higher priority keys.
         """
         properties = {}
         if specs.prefer_files:
-            properties.update({**explicit_properties, **env_properties, **file_properties})
+            properties.update({**explicit_properties, **env_properties, **file_properties, **default_properties})
         else:
-            properties.update({**explicit_properties, **file_properties, **env_properties})
+            properties.update({**explicit_properties, **file_properties, **env_properties, **default_properties})
         return properties
+
+    def _load_default_properties(self) -> Dict[str, Any]:
+        """
+        Loads default values declared in the inheriting class into a dictionary.
+        """
+        default_properties = {}
+        for field_name, model_field in self.__fields__.items():
+            # Uses `pydantic` ModelField to retrieve the default values of the model.
+            default_value = model_field.get_default()
+            if default_value is not None:
+                default_properties[field_name] = ConfigProperty(
+                    name=field_name,
+                    value=default_value,
+                    source_name=ConfigSource.class_default,
+                    source_type=ConfigSource.class_default
+                )
+        return default_properties
 
     @staticmethod
     def _load_explicit_properties(specs: ConfidentConfigSpecs) -> Dict[str, Any]:
@@ -116,7 +142,7 @@ class Confident(BaseModel):
         """
         env_properties = {}
 
-        for key in self.__config_fields__.keys():
+        for key in self.__fields__.keys():
             env_value = os.getenv(key)
             if env_value:
                 env_properties[key] = ConfigProperty(name=key, value=env_value, source_name=ConfigSource.environment,
@@ -146,11 +172,3 @@ class Confident(BaseModel):
 
     def get_full_details(self):
         return deepcopy(self.__getattribute__(FULL_CONFIG_ATTR))
-
-    @property
-    def __metadata_fields__(self) -> Dict[str, ModelField]:
-        return Confident.__fields__
-
-    @property
-    def __config_fields__(self) -> Dict[str, ModelField]:
-        return {key: value for key, value in self.__fields__.items() if key not in self.__metadata_fields__}

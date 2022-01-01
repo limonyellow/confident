@@ -29,6 +29,8 @@ print(config.json())
 #> {"name": "my_name", "port": 5000, "host": "127.0.0.1"}
 print(config)
 #> name='my_name' port=5000 host='127.0.0.1'
+print(config.get_full_details())
+#> {'name': ConfigProperty(name='name', value='my_name', value_type=<class 'str'>, source_name='environment', source_type=<ConfigSource.environment: 'environment'>), 'host': ConfigProperty(name='host', value='localhost', value_type=<class 'str'>, source_name='class_default', source_type=<ConfigSource.class_default: 'class_default'>), 'port': ConfigProperty(name='port', value=5000, value_type=<class 'int'>, source_name='class_default', source_type=<ConfigSource.class_default: 'class_default'>)}
 
 ```
 ## Installation
