@@ -1,12 +1,15 @@
 import os
+from copy import deepcopy
 from typing import Union, List, Any, Dict, Optional
 
+from confident.utils import load_config_file, load_env_files
 from config_property import ConfigProperty
 from config_source import ConfigSource
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 
-from confident.utils import load_config_file, load_env_files
+SPECS_ATTR = '_specs'
+FULL_CONFIG_ATTR = '_full'
 
 
 class ConfidentConfigSpecs(BaseModel):
@@ -29,8 +32,7 @@ class Confident(BaseModel):
     - Environment variables of the operating system.
     - Config files.
     """
-    config_specs: ConfidentConfigSpecs
-    full_config: Dict[str, ConfigProperty]
+    __slots__ = (SPECS_ATTR, FULL_CONFIG_ATTR)
 
     def __init__(
             self,
@@ -75,9 +77,9 @@ class Confident(BaseModel):
                                                  env_properties=env_properties, file_properties=file_properties)
 
         # Create the final object.
+        object.__setattr__(self, SPECS_ATTR, specs)
+        object.__setattr__(self, FULL_CONFIG_ATTR, full_properties)
         super().__init__(
-            config_specs=specs,
-            full_config=full_properties,
             **{key: config_property.value for key, config_property in full_properties.items()}
         )
 
@@ -138,6 +140,12 @@ class Confident(BaseModel):
                                      source_type=ConfigSource.file) for key, value in file_dict.items()})
 
         return {key: file_properties[key] for key in file_properties.keys() & self.__fields__.keys()}
+
+    def get_specs(self):
+        return deepcopy(self.__getattribute__(SPECS_ATTR))
+
+    def get_full_details(self):
+        return deepcopy(self.__getattribute__(FULL_CONFIG_ATTR))
 
     @property
     def __metadata_fields__(self) -> Dict[str, ModelField]:
