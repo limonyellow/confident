@@ -6,7 +6,7 @@ import yaml
 from dotenv import load_dotenv
 
 
-def load_config_file(path: str) -> Dict[str, Any]:
+def load_file(path: str) -> Dict[str, Any]:
     """
     Loads fields from a file into a dictionary.
 

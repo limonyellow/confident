@@ -13,6 +13,7 @@ class ConfigProperty(BaseModel):
     value_type: type
     source_name: str
     source_type: ConfigSource
+    source_location: str
 
     def __init__(self, value: Any, **kwargs):
         value_type = type(value)
