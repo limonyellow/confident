@@ -36,7 +36,7 @@ class ConfidentConfigSpecs(BaseModel):
     explicit_fields: Optional[Dict[str, Any]] = None
     deployment_name: Optional[str] = None
     deployment_attr: Optional[str] = None
-    deployments: Optional[Union[Dict[str, Union[Dict[str, str], Path]], Path]] = None
+    deployments: Optional[Union[Path, Dict[str, Union[Path, Dict[str, Any]]]]] = None
     class_path: Optional[Path] = None
     creation_path: Optional[Path] = None
     source_priority: List[ConfigSource] = DEFAULT_SOURCE_PRIORITY
@@ -54,15 +54,15 @@ class Confident(BaseModel):
 
     def __init__(
             self,
-            specs_path: Optional[str] = None,
-            env_files: Optional[Union[str, List[str]]] = None,
-            config_files: Optional[Union[str, List[str]]] = None,
+            specs_path: Optional[Union[Path, str]] = None,
+            env_files: Optional[Union[Path, str, List[Union[Path, str]]]] = None,
+            config_files: Optional[Union[Path, str, List[Union[Path, str]]]] = None,
             prefer_files: bool = False,
             ignore_missing_files: bool = True,
-            fields: Optional[Dict['str', Any]] = None,
+            fields: Optional[Dict[str, Any]] = None,
             deployment_name: Optional[str] = None,
             deployment_attr: Optional[str] = None,
-            deployments: Optional[Union[Dict[str, Union[Dict[str, str], str]], str]] = None,
+            deployments: Optional[Union[Path, str, Dict[str, Union[Path, str, Dict[str, Any]]]]] = None,
             source_priority: List[ConfigSource] = None,
     ):
         """
