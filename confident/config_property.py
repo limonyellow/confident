@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Any
 
 from config_source import ConfigSource
@@ -10,11 +11,14 @@ class ConfigProperty(BaseModel):
     """
     name: str
     value: Any
-    value_type: type
+    origin_value: Any
     source_name: str
     source_type: ConfigSource
-    source_location: str
+    source_location: Path
 
     def __init__(self, value: Any, **kwargs):
-        value_type = type(value)
-        super().__init__(value=value, value_type=value_type, **kwargs)
+        try:
+            origin_value = kwargs.pop('origin_value')
+        except KeyError:
+            origin_value = value
+        super().__init__(value=value, origin_value=origin_value, **kwargs)

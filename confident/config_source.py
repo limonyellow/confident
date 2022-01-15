@@ -5,8 +5,8 @@ class ConfigSource(str, Enum):
     """
     Possible kinds of configuration sources.
     """
-    env_var = 'env_var'
-    file = 'file'
     explicit = 'explicit'
-    class_default = 'class_default'
+    env_var = 'env_var'
     deployment = 'deployment'
+    file = 'file'
+    class_default = 'class_default'
