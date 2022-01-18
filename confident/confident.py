@@ -30,7 +30,7 @@ class ConfidentConfigSpecs(BaseModel):
     """
     specs_path: Optional[Path] = None
     env_files: Optional[List[Path]] = None
-    config_files: Optional[List[Path]] = None
+    files: Optional[List[Path]] = None
     prefer_files: bool = False
     ignore_missing_files: bool = True
     explicit_fields: Optional[Dict[str, Any]] = None
@@ -56,7 +56,7 @@ class Confident(BaseModel):
             self,
             specs_path: Optional[Union[Path, str]] = None,
             env_files: Optional[Union[Path, str, List[Union[Path, str]]]] = None,
-            config_files: Optional[Union[Path, str, List[Union[Path, str]]]] = None,
+            files: Optional[Union[Path, str, List[Union[Path, str]]]] = None,
             prefer_files: bool = False,
             ignore_missing_files: bool = True,
             fields: Optional[Dict[str, Any]] = None,
@@ -71,7 +71,7 @@ class Confident(BaseModel):
                 This metadata will be used to insert the config properties into the created Confident config object.
             env_files: File paths of '.env' files with rows in the format '<env_var>=<value>'
                 to insert as config properties.
-            config_files: File paths of 'json' or 'yaml' files to insert as config properties.
+            files: File paths of 'json' or 'yaml' files to insert as config properties.
             prefer_files: In case of identical property name from different sources, whether to insert the values from
                 the files over the values from environment variables.
             ignore_missing_files: Whether to skip when a given file path is not exists or to raise a matching error.
@@ -82,16 +82,18 @@ class Confident(BaseModel):
         caller_module = inspect.getmodule(inspect.stack()[1][0])
         caller_location = caller_module.__file__ if caller_module else None
 
+        deployment_attr = self._find_deployment_attr(explicit_deployment_attr=deployment_attr)
+
         if specs_path:
             specs = ConfidentConfigSpecs.parse_file(specs_path)
             specs.specs_path = specs_path
         else:
             env_files = [env_files] if isinstance(env_files, str) else env_files or []
-            config_files = [config_files] if isinstance(config_files, str) else config_files or []
+            files = [files] if isinstance(files, str) else files or []
             specs = ConfidentConfigSpecs(
                 specs_path=specs_path,
                 env_files=env_files,
-                config_files=config_files,
+                files=files,
                 prefer_file=prefer_files,
                 ignore_missing_files=ignore_missing_files,
                 explicit_fields=fields,
@@ -183,7 +185,7 @@ class Confident(BaseModel):
             specs: The specifications of the config object.
         """
         file_properties = {}
-        for file_path in specs.config_files:
+        for file_path in specs.files:
             if not os.path.isfile(file_path) and specs.ignore_missing_files:
                 continue
             file_dict = load_file(path=file_path)
@@ -222,7 +224,7 @@ class Confident(BaseModel):
 
     def _load_deployment_properties(
             self, specs: ConfidentConfigSpecs, all_properties: Dict[ConfigSource, Dict[str, ConfigProperty]]
-    ):
+    ) -> Dict[str, ConfigProperty]:
         """
         Loads the relevant deployment config properties.
 
@@ -310,11 +312,48 @@ class Confident(BaseModel):
                 pass
         return origin_value
 
-    def specs(self):
+    def _find_deployment_attr(self, explicit_deployment_attr):
+        """
+        Searches if one of the fields declared in the sub class has marked as the deployment attribute.
+        Args:
+            explicit_deployment_attr: The deployment attribute received as argument.
+
+        Returns:
+            A single deployment attribute. None if no attribute provided in any way.
+
+        Raises:
+            ValueError - If more than one deployment attribute is received.
+        """
+        fields_marked_as_deployment_attr = [
+            name for name, model_field in self.__fields__.items() if
+            model_field.field_info.extra.get('deployment_field')
+        ]
+        if not fields_marked_as_deployment_attr:
+            return explicit_deployment_attr
+        if explicit_deployment_attr and fields_marked_as_deployment_attr:
+            raise ValueError(
+                f'Cannot have both explicit `deployment_attr` arg and also `DeploymentField()` '
+                f'in {self.__class__.__name__} declaration'
+            )
+        if len(fields_marked_as_deployment_attr) > 1:
+            raise ValueError(f'Cannot have more then one `DeploymentField()` in {self.__class__.__name__} declaration')
+        return fields_marked_as_deployment_attr[0]
+
+    def specs(self) -> ConfidentConfigSpecs:
+        """
+        Returns: A deep copy of the config class specs.
+        """
         return deepcopy(self.__getattribute__(SPECS_ATTR))
 
-    def full_details(self):
+    def full_details(self) -> Dict[str, ConfigProperty]:
+        """
+        Returns: A dictionary with details of every field.
+        """
         return deepcopy(self.__getattribute__(FULL_CONFIG_ATTR))
 
-    def all_loaded_properties(self):
+    def all_loaded_properties(self) -> Dict[ConfigSource, Dict[str, ConfigProperty]]:
+        """
+        Returns: A dictionary divided to sources with all the fields that were loaded during the creation of the config
+        class. Even the fields
+        """
         return deepcopy(self.__getattribute__(ALL_LOADED_CONFIG_ATTR))
