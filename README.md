@@ -1,9 +1,14 @@
 # Confident
 Confident helps you create configuration objects from multiple sources of variables such as files and environment variables.  
 Confident configuration objects are data models that enforce validation and type hints by using [pydantic](https://pydantic-docs.helpmanual.io/) library.
+For simple configuration loading from environment variables, you might want to check pydantic's [`BaseSettings`](https://pydantic-docs.helpmanual.io/usage/settings/) model.
+
+With Confident you can manage multiple configurations depend on the environment your code is deployed.
+While having lots of flexibility how to describe your config objects, Confident will provide visibility of the loading config 
+process and help you expose mis-configuration as soon a possible.
 
 ## Example
-```py
+```python
 import os
 
 from confident import Confident
@@ -11,28 +16,31 @@ from confident import Confident
 
 # Creating your own config class by inheriting from `Confident`.
 class MyAppConfig(Confident):
-    name: str
     port: int = 5000
     host: str = 'localhost'
+    labels: list
 
 
 # Illustrates some environment variables.
-os.environ['name'] = 'my_name' 
 os.environ['host'] = '127.0.0.1'
+os.environ['labels'] = '["FOO", "BAR"]'  # JSON strings can be used for more types.
 
-# Creating the config object. `Confident` will insert the values of the properties.
+
+# Creating the config object. `Confident` will load the values of the properties.
 config = MyAppConfig()
 
-print(config.name)
-#> my_name
+print(config.host)
+#> 127.0.0.1
 print(config.json())
-#> {"name": "my_name", "port": 5000, "host": "127.0.0.1"}
+#> {"port": 5000, "host": "127.0.0.1", "labels": ["FOO", "BAR"]}
 print(config)
-#> name='my_name' port=5000 host='127.0.0.1'
-print(config.get_full_details())
-#> {'name': ConfigProperty(name='name', value='my_name', value_type=<class 'str'>, source_name='environment', source_type=<ConfigSource.environment: 'environment'>),  
-#> 'host': ConfigProperty(name='host', value='127.0.0.1', value_type=<class 'str'>, source_name='environment', source_type=<ConfigSource.environment: 'environment'>),  
-#> 'port': ConfigProperty(name='port', value=5000, value_type=<class 'int'>, source_name='class_default', source_type=<ConfigSource.class_default: 'class_default'>)} 
+#> port=5000 host='127.0.0.1' labels=['FOO', 'BAR']
+print(config.full_details())
+#> {
+# 'port': ConfigProperty(name='port', value=5000, origin_value=5000, source_name='MyAppConfig', source_type='class_default', source_location=PosixPath('~/confident/readme_example.py')),
+# 'host': ConfigProperty(name='host', value='127.0.0.1', origin_value='127.0.0.1', source_name='host', source_type='env_var', source_location='host'),
+# 'labels': ConfigProperty(name='labels', value=['FOO', 'BAR'], origin_value='["FOO", "BAR"]', source_name='labels', source_type='env_var', source_location='labels')
+# }
 
 ```
 
@@ -44,7 +52,7 @@ Confident object can load config fields from multiple sources:
 1. Environment variables.
 1. Config files such as 'json' and 'yaml'.
 1. '.env' files.
-1. Explicitly given fields in the constructor level.
+1. Explicitly given fields.
 1. Default values.
 
 Confident object core functionality is based on [pydantic](https://pydantic-docs.helpmanual.io/) library. 
@@ -52,15 +60,130 @@ That means the Confident config object has all the benefits of pydantic's [BaseM
 Type validation, [object transformation](https://pydantic-docs.helpmanual.io/usage/exporting_models/) and many more features.
 
 ## Usage
-# Load Config files  
+# Load Config files
+Confident supports `json`, `yaml` and `.env` files.  
+#### `app_config/config1.json`
+```json
+{
+  "title": "my_app_1",
+  "retry": true,
+  "timeout": 10
+}
+``` 
 
+#### `app_config/config2.yaml`
+```yaml
+title: my_yaml_ap
+port: 3030
+``` 
+
+```python
+from confident import Confident
+
+
+class MyConfig(Confident):
+    title: str
+    port: int = 5000
+    retry: bool = False
+
+config = MyConfig(files=['app_config/config1.json', 'app_config/config2.yaml'])
+
+print(config)
+#> title='my_app_1' port=3030 retry=True
+```
+
+# Load deployments
+Deployment in Confident is basically a dictionary of configurations that only one will be loaded in the execution time
+depends on the key given. 
+This key is called `deployment_attr` and it is one of the config object attribute.  
+For having the following deployment configurations (can also specified in a `json` or `yaml` file):
+```python
+multi_configs = {
+                    'prod': {
+                        'host': 'https://prod_server',
+                        'log_level': 'info'
+                    },
+                    'dev': {
+                        'host': 'http://dev_server',
+                        'log_level': 'debug'
+                    },
+                    'local': {
+                        'host': 'localhost',
+                        'log_level': 'debug'
+                    },
+}
+``` 
+#### `app/configs.json`
+```json
+{
+    "prod": {
+        "host": "https://prod_server",
+        "log_level": "info"
+    },
+    "dev": {
+        "host": "http://dev_server",
+        "log_level": "debug"
+    },
+    "local": {
+        "host": "localhost",
+        "log_level": "debug"
+    }
+}
+```
+The config class definition can be as follows:
+```python
+from confident import Confident
+
+class MainConfig(Confident):
+    current_deployment: str = 'local'  # <-- This will be our `deployment_attr`.
+    host: str
+    port: int = 5000
+    log_level: str = 'error'
+```
+Now we can create the config object in several ways:
+```python
+# Using python dict:
+config_a = MainConfig(deployment_attr='current_deployment', deployments=multi_configs)
+print(config_a)
+#> current_deployment='local' host='localhost' port=5000 log_level='debug'
+
+# Same, but from a file path:
+config_b = MainConfig(deployment_attr='current_deployment', deployments='app/configs.json')
+print(config_b)
+#> current_deployment='local' host='localhost' port=5000 log_level='debug'
+```
+Notice that the `deployment_attr` as every other field, can be loaded from a source.
+```python
+os.environ['current_deployment'] = 'dev'  # Setting the field as an environment variable.
+config_c = MainConfig(deployment_attr='current_deployment', deployments='app/configs.json')
+print(config_c)
+#> current_deployment='dev' host='http://dev_server' port=5000 log_level='debug'
+```
+Selecting the `deployment_attr` can be done in class definition using `DeploymentField`.  
+`DeploymentField` has the same functionality as pydantic `Field`.
+```python
+import os
+
+from confident import Confident, DeploymentField
+
+class MainConfig(Confident):
+    deployment: str = DeploymentField('local')  # <-- This will be our `deployment_attr`.
+    host: str
+    port: int = 5000
+    log_level: str = 'error'
+
+os.environ['deployment'] = 'prod'
+config_d = MainConfig(deployments='app/configs.json')  # <-- No need to mention the `deployment_attr`.
+print(config_d)
+#> deployment='prod' host='https://prod_server' port=5000 log_level='info'
+```
 
 ## Contributing
 To contribute to Confident, please make sure that any new features or changes to existing functionality include test coverage.
 
 ### Creating Distribution
 Build the distribution:  
-```python3 setup.py sdist```
+```python setup.py sdist```
 
 Upload to pypi:  
-```twine upload dist/*```
+```twine upload dist/confident-<version>.tar.gz```

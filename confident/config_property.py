@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 from config_source import ConfigSource
 from pydantic.main import BaseModel
@@ -14,7 +14,7 @@ class ConfigProperty(BaseModel):
     origin_value: Any
     source_name: str
     source_type: ConfigSource
-    source_location: Path
+    source_location: Union[str, Path]
 
     def __init__(self, value: Any, **kwargs):
         try:
