@@ -1,5 +1,5 @@
 # Confident
-Confident helps you create configuration objects from multiple sources of variables such as files and environment variables.  
+Confident helps you create configuration objects from multiple sources such as files and environment variables.  
 Confident configuration objects are data models that enforce validation and type hints by using [pydantic](https://pydantic-docs.helpmanual.io/) library.
 For simple configuration loading from environment variables, you might want to check pydantic's [`BaseSettings`](https://pydantic-docs.helpmanual.io/usage/settings/) model.
 
@@ -56,11 +56,11 @@ Confident object can load config fields from multiple sources:
 1. Default values.
 
 Confident object core functionality is based on [pydantic](https://pydantic-docs.helpmanual.io/) library. 
-That means the Confident config object has all the benefits of pydantic's [BaseModel](https://pydantic-docs.helpmanual.io/usage/models/) including
+That means the Confident config object has all the benefits of pydantic's [`BaseModel`](https://pydantic-docs.helpmanual.io/usage/models/) including
 Type validation, [object transformation](https://pydantic-docs.helpmanual.io/usage/exporting_models/) and many more features.
 
 ## Usage
-# Load Config files
+### Load Config files
 Confident supports `json`, `yaml` and `.env` files.  
 #### `app_config/config1.json`
 ```json
@@ -92,10 +92,10 @@ print(config)
 #> title='my_app_1' port=3030 retry=True
 ```
 
-# Load deployments
+### Load deployments
 Deployment in Confident is basically a dictionary of configurations that only one will be loaded in the execution time
 depends on the key given. 
-This key is called `deployment_attr` and it is one of the config object attribute.  
+This key is called `deployment_field` and it is one of the config object properties.  
 For having the following deployment configurations (can also specified in a `json` or `yaml` file):
 ```python
 multi_configs = {
@@ -135,7 +135,7 @@ The config class definition can be as follows:
 from confident import Confident
 
 class MainConfig(Confident):
-    current_deployment: str = 'local'  # <-- This will be our `deployment_attr`.
+    current_deployment: str = 'local'  # <-- This will be our `deployment_field`.
     host: str
     port: int = 5000
     log_level: str = 'error'
@@ -143,37 +143,37 @@ class MainConfig(Confident):
 Now we can create the config object in several ways:
 ```python
 # Using python dict:
-config_a = MainConfig(deployment_attr='current_deployment', deployments=multi_configs)
+config_a = MainConfig(deployment_field='current_deployment', deployments=multi_configs)
 print(config_a)
 #> current_deployment='local' host='localhost' port=5000 log_level='debug'
 
 # Same, but from a file path:
-config_b = MainConfig(deployment_attr='current_deployment', deployments='app/configs.json')
+config_b = MainConfig(deployment_field='current_deployment', deployments='app/configs.json')
 print(config_b)
 #> current_deployment='local' host='localhost' port=5000 log_level='debug'
 ```
-Notice that the `deployment_attr` as every other field, can be loaded from a source.
+Notice that the `deployment_field` as every other field, can be loaded from a source.
 ```python
 os.environ['current_deployment'] = 'dev'  # Setting the field as an environment variable.
-config_c = MainConfig(deployment_attr='current_deployment', deployments='app/configs.json')
+config_c = MainConfig(deployment_field='current_deployment', deployments='app/configs.json')
 print(config_c)
 #> current_deployment='dev' host='http://dev_server' port=5000 log_level='debug'
 ```
-Selecting the `deployment_attr` can be done in class definition using `DeploymentField`.  
-`DeploymentField` has the same functionality as pydantic `Field`.
+Selecting the `deployment_field` can be done in class definition using `DeploymentField`.  
+`DeploymentField` has the same functionality as pydantic [`Field`](https://pydantic-docs.helpmanual.io/usage/schema/#field-customization).
 ```python
 import os
 
 from confident import Confident, DeploymentField
 
 class MainConfig(Confident):
-    deployment: str = DeploymentField('local')  # <-- This will be our `deployment_attr`.
+    deployment: str = DeploymentField('local')  # <-- This will be our `deployment_field`.
     host: str
     port: int = 5000
     log_level: str = 'error'
 
 os.environ['deployment'] = 'prod'
-config_d = MainConfig(deployments='app/configs.json')  # <-- No need to mention the `deployment_attr`.
+config_d = MainConfig(deployments='app/configs.json')  # <-- No need to mention the `deployment_field`.
 print(config_d)
 #> deployment='prod' host='https://prod_server' port=5000 log_level='info'
 ```

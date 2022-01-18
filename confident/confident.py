@@ -35,8 +35,8 @@ class ConfidentConfigSpecs(BaseModel):
     ignore_missing_files: bool = True
     explicit_fields: Optional[Dict[str, Any]] = None
     deployment_name: Optional[str] = None
-    deployment_attr: Optional[str] = None
-    deployments: Optional[Union[Path, Dict[str, Union[Path, Dict[str, Any]]]]] = None
+    deployment_field: Optional[str] = None
+    deployment_config: Optional[Union[Path, Dict[str, Union[Path, Dict[str, Any]]]]] = None
     class_path: Optional[Path] = None
     creation_path: Optional[Path] = None
     source_priority: List[ConfigSource] = DEFAULT_SOURCE_PRIORITY
@@ -61,8 +61,8 @@ class Confident(BaseModel):
             ignore_missing_files: bool = True,
             fields: Optional[Dict[str, Any]] = None,
             deployment_name: Optional[str] = None,
-            deployment_attr: Optional[str] = None,
-            deployments: Optional[Union[Path, str, Dict[str, Union[Path, str, Dict[str, Any]]]]] = None,
+            deployment_field: Optional[str] = None,
+            deployment_config: Optional[Union[Path, str, Dict[str, Union[Path, str, Dict[str, Any]]]]] = None,
             source_priority: List[ConfigSource] = None,
     ):
         """
@@ -82,7 +82,7 @@ class Confident(BaseModel):
         caller_module = inspect.getmodule(inspect.stack()[1][0])
         caller_location = caller_module.__file__ if caller_module else None
 
-        deployment_attr = self._find_deployment_attr(explicit_deployment_attr=deployment_attr)
+        deployment_field = self._find_deployment_field(explicit_deployment_field=deployment_field)
 
         if specs_path:
             specs = ConfidentConfigSpecs.parse_file(specs_path)
@@ -98,8 +98,8 @@ class Confident(BaseModel):
                 ignore_missing_files=ignore_missing_files,
                 explicit_fields=fields,
                 deployment_name=deployment_name,
-                deployment_attr=deployment_attr,
-                deployments=deployments,
+                deployment_field=deployment_field,
+                deployment_config=deployment_config,
                 class_path=subclass_location,
                 creation_path=caller_location,
                 source_priority=source_priority or SOURCE_PRIORITY_PREFER_FILES if prefer_files else
@@ -233,41 +233,41 @@ class Confident(BaseModel):
             all_properties: All loaded properties to find the deployment attribute in.
         """
         deployment_name = specs.deployment_name
-        deployment_attr = specs.deployment_attr
-        deployments = specs.deployments
+        deployment_field = specs.deployment_field
+        deployment_config = specs.deployment_config
         deployment_location = specs.creation_path
 
-        if deployment_attr is None and deployment_name is None:
+        if deployment_field is None and deployment_name is None:
             return {}
-        if deployment_attr is not None and deployment_name is not None:
-            raise ValueError('Can not have both `deployment_attr` and `deployment_name`. Only one can be used.')
-        if deployments is None:
-            raise ValueError('Environment default is enabled but no `deployments` was provided.')
-        if isinstance(deployments, Path):
-            deployment_location = deployments
-            deployments = load_file(deployment_location)
+        if deployment_field is not None and deployment_name is not None:
+            raise ValueError('Can not have both `deployment_field` and `deployment_name`. Only one can be used.')
+        if deployment_config is None:
+            raise ValueError('Environment default is enabled but no `deployment_config` was provided.')
+        if isinstance(deployment_config, Path):
+            deployment_location = deployment_config
+            deployment_config = load_file(deployment_location)
 
         deployment = {}
         deployment_properties = {}
 
         if deployment_name:
-            deployment = deployments.get(deployment_name)
-        if deployment_attr:
+            deployment = deployment_config.get(deployment_name)
+        if deployment_field:
             # Search for the deployment name in all possible sources ordered by priority.
             for source in reversed(dict.fromkeys(specs.source_priority).keys()):
                 if source == ConfigSource.deployment:
                     continue
-                config_property = all_properties[source].get(deployment_attr)
+                config_property = all_properties[source].get(deployment_field)
                 if config_property:
                     deployment_name = config_property.value
                     break
 
             if not isinstance(deployment_name, str):
                 raise ValueError(
-                    f'{deployment_attr=} is not valid. Value has to be <str> not {deployment_name} '
+                    f'{deployment_field=} is not valid. Value has to be <str> not {deployment_name} '
                     f'type={type(deployment_name)}'
                 )
-            deployment = deployments.get(deployment_name)
+            deployment = deployment_config.get(deployment_name)
 
         if isinstance(deployment, str):
             deployment = load_file(deployment)
@@ -312,32 +312,32 @@ class Confident(BaseModel):
                 pass
         return origin_value
 
-    def _find_deployment_attr(self, explicit_deployment_attr):
+    def _find_deployment_field(self, explicit_deployment_field):
         """
-        Searches if one of the fields declared in the sub class has marked as the deployment attribute.
+        Searches if one of the fields declared in the sub class has marked as the deployment field.
         Args:
-            explicit_deployment_attr: The deployment attribute received as argument.
+            explicit_deployment_field: The deployment field received as argument.
 
         Returns:
-            A single deployment attribute. None if no attribute provided in any way.
+            A single deployment field. None if no field provided in any way.
 
         Raises:
-            ValueError - If more than one deployment attribute is received.
+            ValueError - If more than one deployment fields is received.
         """
-        fields_marked_as_deployment_attr = [
+        properties_marked_as_deployment_field = [
             name for name, model_field in self.__fields__.items() if
             model_field.field_info.extra.get('deployment_field')
         ]
-        if not fields_marked_as_deployment_attr:
-            return explicit_deployment_attr
-        if explicit_deployment_attr and fields_marked_as_deployment_attr:
+        if not properties_marked_as_deployment_field:
+            return explicit_deployment_field
+        if explicit_deployment_field and properties_marked_as_deployment_field:
             raise ValueError(
-                f'Cannot have both explicit `deployment_attr` arg and also `DeploymentField()` '
+                f'Cannot have both explicit `deployment_field` arg and also `DeploymentField()` '
                 f'in {self.__class__.__name__} declaration'
             )
-        if len(fields_marked_as_deployment_attr) > 1:
+        if len(properties_marked_as_deployment_field) > 1:
             raise ValueError(f'Cannot have more then one `DeploymentField()` in {self.__class__.__name__} declaration')
-        return fields_marked_as_deployment_attr[0]
+        return properties_marked_as_deployment_field[0]
 
     def specs(self) -> ConfidentConfigSpecs:
         """
