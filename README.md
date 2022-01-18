@@ -49,11 +49,12 @@ print(config.full_details())
 
 ## Capabilities
 Confident object can load config fields from multiple sources:
-1. Environment variables.
-1. Config files such as 'json' and 'yaml'.
-1. '.env' files.
-1. Explicitly given fields.
-1. Default values.
+- Environment variables.
+- Config files such as 'json' and 'yaml'.
+- '.env' files.
+- Explicitly given fields.
+- Default values.
+- Deployment configs. (See below)
 
 Confident object core functionality is based on [pydantic](https://pydantic-docs.helpmanual.io/) library. 
 That means the Confident config object has all the benefits of pydantic's [`BaseModel`](https://pydantic-docs.helpmanual.io/usage/models/) including
@@ -92,9 +93,9 @@ print(config)
 #> title='my_app_1' port=3030 retry=True
 ```
 
-### Load deployments
-Deployment in Confident is basically a dictionary of configurations that only one will be loaded in the execution time
-depends on the key given. 
+### Load deployment configs
+Deployment config in Confident is basically a dictionary of configurations values that only one will be loaded in execution time
+depends on a given key. 
 This key is called `deployment_field` and it is one of the config object properties.  
 For having the following deployment configurations (can also specified in a `json` or `yaml` file):
 ```python
