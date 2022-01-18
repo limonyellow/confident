@@ -9,7 +9,7 @@ def DeploymentField(*args, **kwargs):
     responsible for the decision which deployment config to load.
     """
     if kwargs.get(DEPLOYMENT_FIELD_FLAG):
-        raise ValueError(f'Can not use "{DEPLOYMENT_FIELD_FLAG}" key inside `DeploymentField()`.')
+        raise ValueError(f'Cannot use "{DEPLOYMENT_FIELD_FLAG}" key inside `DeploymentField()`.')
     return Field(*args, **kwargs, **{DEPLOYMENT_FIELD_FLAG: True})
 
 

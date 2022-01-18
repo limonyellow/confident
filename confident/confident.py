@@ -240,7 +240,7 @@ class Confident(BaseModel):
         if deployment_field is None and deployment_name is None:
             return {}
         if deployment_field is not None and deployment_name is not None:
-            raise ValueError('Can not have both `deployment_field` and `deployment_name`. Only one can be used.')
+            raise ValueError('Cannot have both `deployment_field` and `deployment_name`. Only one can be used.')
         if deployment_config is None:
             raise ValueError('Environment default is enabled but no `deployment_config` was provided.')
         if isinstance(deployment_config, Path):
@@ -273,6 +273,12 @@ class Confident(BaseModel):
             deployment = load_file(deployment)
 
         for name, value in deployment.items():
+            if name == deployment_field:
+                raise ValueError(
+                    f"{deployment_field=} cannot appear in the deployment config key '{deployment_name}'. "
+                    f"Look for {deployment_location=} at '{deployment_name}'. "
+                    f"Remove '{deployment_field}' key or change the deployment field."
+                )
             deployment_properties[name] = ConfigProperty(
                 name=name,
                 value=self._convert_property_value(property_name=name, origin_value=value),
