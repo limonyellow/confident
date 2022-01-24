@@ -1,8 +1,9 @@
 from pathlib import Path
 from typing import Any, Union
 
-from config_source import ConfigSource
-from pydantic.main import BaseModel
+from pydantic import BaseModel
+
+from .config_source import ConfigSource
 
 
 class ConfigProperty(BaseModel):

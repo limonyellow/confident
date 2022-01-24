@@ -1,10 +1,8 @@
 import setuptools
 
-from confident import PACKAGE_VERSION
-
 setuptools.setup(
       name='confident',
-      version=PACKAGE_VERSION,
+      version='0.1.3',
       description='Loading configurations from multiple sources into a data model.',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',
