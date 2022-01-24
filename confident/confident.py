@@ -6,10 +6,11 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Union, List, Any, Dict, Optional
 
-from confident.utils import load_file, load_env_files
-from config_property import ConfigProperty
-from config_source import ConfigSource
 from pydantic import BaseModel
+
+from .config_property import ConfigProperty
+from .config_source import ConfigSource
+from .utils import load_file, load_env_files
 
 SPECS_ATTR = '_specs'
 FULL_CONFIG_ATTR = '_full'
@@ -80,7 +81,7 @@ class Confident(BaseModel):
         # Prepare metadata.
         subclass_location = self._get_subclass_file_path()
         caller_module = inspect.getmodule(inspect.stack()[1][0])
-        caller_location = caller_module.__file__ if caller_module else None
+        caller_location = caller_module.__file__ if caller_module else Path.cwd()
 
         deployment_field = self._find_deployment_field(explicit_deployment_field=deployment_field)
 
@@ -296,6 +297,8 @@ class Confident(BaseModel):
             return importlib.import_module(self.__module__).__file__
         except ImportError:
             return self.__module__
+        except AttributeError:
+            return Path.cwd()
 
     def _convert_property_value(self, property_name: str, origin_value: Any) -> Any:
         """
