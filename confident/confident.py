@@ -16,6 +16,17 @@ SPECS_ATTR = '_specs'
 FULL_CONFIG_ATTR = '_full'
 ALL_LOADED_CONFIG_ATTR = '_loaded'
 
+CONFIG_CLASS_NAME = 'ConfidentConfig'
+CONFIG_CLASS_SPECS_PATH_ATTR = 'specs_path'
+CONFIG_CLASS_ENV_FILES_ATTR = 'env_files'
+CONFIG_CLASS_FILES_ATTR = 'files'
+CONFIG_CLASS_PREFER_FILES_ATTR = 'prefer_files'
+CONFIG_CLASS_IGNORE_MISSING_FILES_ATTR = 'ignore_missing_files'
+CONFIG_CLASS_DEPLOYMENT_NAME_ATTR = 'deployment_name'
+CONFIG_CLASS_DEPLOYMENT_FIELD_ATTR = 'deployment_field'
+CONFIG_CLASS_DEPLOYMENT_CONFIG_ATTR = 'deployment_config'
+CONFIG_CLASS_SOURCE_PRIORITY_ATTR = 'source_priority'
+
 DEFAULT_SOURCE_PRIORITY = [
     ConfigSource.explicit, ConfigSource.env_var, ConfigSource.deployment, ConfigSource.file, ConfigSource.class_default
 ]
@@ -23,6 +34,9 @@ DEFAULT_SOURCE_PRIORITY = [
 SOURCE_PRIORITY_PREFER_FILES = [
     ConfigSource.explicit, ConfigSource.env_var, ConfigSource.file, ConfigSource.deployment, ConfigSource.class_default
 ]
+
+PREFER_FILES_DEFAULT = False
+IGNORE_MISSING_FILES_DEFAULT = True
 
 
 class ConfidentConfigSpecs(BaseModel):
@@ -32,8 +46,8 @@ class ConfidentConfigSpecs(BaseModel):
     specs_path: Optional[Path] = None
     env_files: Optional[List[Path]] = None
     files: Optional[List[Path]] = None
-    prefer_files: bool = False
-    ignore_missing_files: bool = True
+    prefer_files: bool = PREFER_FILES_DEFAULT
+    ignore_missing_files: bool = IGNORE_MISSING_FILES_DEFAULT
     explicit_fields: Optional[Dict[str, Any]] = None
     deployment_name: Optional[str] = None
     deployment_field: Optional[str] = None
@@ -58,8 +72,8 @@ class Confident(BaseModel):
             specs_path: Optional[Union[Path, str]] = None,
             env_files: Optional[Union[Path, str, List[Union[Path, str]]]] = None,
             files: Optional[Union[Path, str, List[Union[Path, str]]]] = None,
-            prefer_files: bool = False,
-            ignore_missing_files: bool = True,
+            prefer_files: Optional[bool] = None,
+            ignore_missing_files: Optional[bool] = None,
             fields: Optional[Dict[str, Any]] = None,
             deployment_name: Optional[str] = None,
             deployment_field: Optional[str] = None,
@@ -82,29 +96,43 @@ class Confident(BaseModel):
         subclass_location = self._get_subclass_file_path()
         caller_module = inspect.getmodule(inspect.stack()[1][0])
         caller_location = caller_module.__file__ if caller_module else Path.cwd()
+        class_config_dict = self._get_class_config_dict()
 
-        deployment_field = self._find_deployment_field(explicit_deployment_field=deployment_field)
+        deployment_field = self._find_deployment_field(
+            explicit_deployment_field=deployment_field or class_config_dict.get(CONFIG_CLASS_DEPLOYMENT_FIELD_ATTR)
+        )
 
+        specs_path = specs_path or class_config_dict.get(CONFIG_CLASS_SPECS_PATH_ATTR)
         if specs_path:
             specs = ConfidentConfigSpecs.parse_file(specs_path)
             specs.specs_path = specs_path
         else:
+            env_files = env_files or class_config_dict.get(CONFIG_CLASS_ENV_FILES_ATTR)
             env_files = [env_files] if isinstance(env_files, str) else env_files or []
+
+            files = files or class_config_dict.get(CONFIG_CLASS_FILES_ATTR)
             files = [files] if isinstance(files, str) else files or []
+
+            prefer_files = prefer_files or class_config_dict.get(CONFIG_CLASS_PREFER_FILES_ATTR, PREFER_FILES_DEFAULT)
+
             specs = ConfidentConfigSpecs(
                 specs_path=specs_path,
                 env_files=env_files,
                 files=files,
                 prefer_file=prefer_files,
-                ignore_missing_files=ignore_missing_files,
+                ignore_missing_files=ignore_missing_files or class_config_dict.get(
+                    CONFIG_CLASS_IGNORE_MISSING_FILES_ATTR, IGNORE_MISSING_FILES_DEFAULT
+                ),
                 explicit_fields=fields,
-                deployment_name=deployment_name,
+                deployment_name=deployment_name or class_config_dict.get(CONFIG_CLASS_DEPLOYMENT_NAME_ATTR),
                 deployment_field=deployment_field,
-                deployment_config=deployment_config,
+                deployment_config=deployment_config or class_config_dict.get(CONFIG_CLASS_DEPLOYMENT_CONFIG_ATTR),
                 class_path=subclass_location,
                 creation_path=caller_location,
-                source_priority=source_priority or SOURCE_PRIORITY_PREFER_FILES if prefer_files else
-                SOURCE_PRIORITY_PREFER_FILES
+                source_priority=(
+                    source_priority or class_config_dict.get(CONFIG_CLASS_SOURCE_PRIORITY_ATTR) or
+                    SOURCE_PRIORITY_PREFER_FILES if prefer_files else SOURCE_PRIORITY_PREFER_FILES
+                )
             )
 
         # Load properties from all sources.
@@ -292,13 +320,32 @@ class Confident(BaseModel):
         specs.deployment_name = deployment_name
         return deployment_properties
 
-    def _get_subclass_file_path(self):
+    def _get_subclass_file_path(self) -> Union[str, Path]:
+        """
+        Gets the path that the config class is initiated from.
+        Tries to find the path of the caller module.
+        If the module can't be imported returns the module name.
+        If there is no module that called this class constructor, returns the current working path.
+        """
         try:
             return importlib.import_module(self.__module__).__file__
         except ImportError:
             return self.__module__
         except AttributeError:
             return Path.cwd()
+
+    def _get_class_config_dict(self) -> Dict[str, Any]:
+        """
+        Tries to retrieve the config class that was declared in the subclass.
+
+        Returns:
+            Dictionary with config values.
+        """
+        try:
+            class_config = self.__getattribute__(CONFIG_CLASS_NAME)
+        except AttributeError:
+            return {}
+        return class_config.__dict__
 
     def _convert_property_value(self, property_name: str, origin_value: Any) -> Any:
         """
@@ -321,7 +368,7 @@ class Confident(BaseModel):
                 pass
         return origin_value
 
-    def _find_deployment_field(self, explicit_deployment_field):
+    def _find_deployment_field(self, explicit_deployment_field) -> str:
         """
         Searches if one of the fields declared in the sub class has marked as the deployment field.
         Args:
@@ -333,6 +380,7 @@ class Confident(BaseModel):
         Raises:
             ValueError - If more than one deployment fields is received.
         """
+        # any([all(t) for t in [(True, False), (True, False), (False, False)]])
         properties_marked_as_deployment_field = [
             name for name, model_field in self.__fields__.items() if
             model_field.field_info.extra.get('deployment_field')
