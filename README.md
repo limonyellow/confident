@@ -184,7 +184,7 @@ To contribute to Confident, please make sure that any new features or changes to
 
 ### Creating Distribution
 Build the distribution:  
-```python setup.py sdist```
+```python setup.py sdist bdist_wheel```
 
 Upload to pypi:  
-```twine upload dist/confident-<version>.tar.gz```
+```twine upload dist/confident-<version>*```
