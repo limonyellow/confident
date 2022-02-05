@@ -74,7 +74,7 @@ Confident supports `json`, `yaml` and `.env` files.
 
 #### `app_config/config2.yaml`
 ```yaml
-title: my_yaml_ap
+title: my_yaml_app
 port: 3030
 ``` 
 
