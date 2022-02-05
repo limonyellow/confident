@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
       name='confident',
-      version='0.1.3',
+      version='0.1.4',
       description='Loading configurations from multiple sources into a data model.',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',
