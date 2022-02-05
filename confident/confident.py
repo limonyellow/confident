@@ -44,8 +44,8 @@ class ConfidentConfigSpecs(BaseModel):
     A model that holds all the metadata regarding the Confident config object.
     """
     specs_path: Optional[Path] = None
-    env_files: Optional[List[Path]] = None
-    files: Optional[List[Path]] = None
+    env_files: List[Path] = []
+    files: List[Path] = []
     prefer_files: bool = PREFER_FILES_DEFAULT
     ignore_missing_files: bool = IGNORE_MISSING_FILES_DEFAULT
     explicit_fields: Optional[Dict[str, Any]] = None
@@ -105,7 +105,9 @@ class Confident(BaseModel):
         specs_path = specs_path or class_config_dict.get(CONFIG_CLASS_SPECS_PATH_ATTR)
         if specs_path:
             specs = ConfidentConfigSpecs.parse_file(specs_path)
-            specs.specs_path = specs_path
+            specs.specs_path = Path(specs_path)
+            specs.class_path = subclass_location
+            specs.creation_path = caller_location
         else:
             env_files = env_files or class_config_dict.get(CONFIG_CLASS_ENV_FILES_ATTR)
             env_files = [env_files] if isinstance(env_files, str) else env_files or []
@@ -113,16 +115,21 @@ class Confident(BaseModel):
             files = files or class_config_dict.get(CONFIG_CLASS_FILES_ATTR)
             files = [files] if isinstance(files, str) else files or []
 
-            prefer_files = prefer_files or class_config_dict.get(CONFIG_CLASS_PREFER_FILES_ATTR, PREFER_FILES_DEFAULT)
+            prefer_files = (
+                    prefer_files if prefer_files is not None
+                    else class_config_dict.get(CONFIG_CLASS_PREFER_FILES_ATTR, PREFER_FILES_DEFAULT)
+            )
+            ignore_missing_files = (
+                ignore_missing_files if ignore_missing_files is not None
+                else class_config_dict.get(CONFIG_CLASS_IGNORE_MISSING_FILES_ATTR, IGNORE_MISSING_FILES_DEFAULT)
+            )
 
             specs = ConfidentConfigSpecs(
                 specs_path=specs_path,
                 env_files=env_files,
                 files=files,
                 prefer_file=prefer_files,
-                ignore_missing_files=ignore_missing_files or class_config_dict.get(
-                    CONFIG_CLASS_IGNORE_MISSING_FILES_ATTR, IGNORE_MISSING_FILES_DEFAULT
-                ),
+                ignore_missing_files=ignore_missing_files,
                 explicit_fields=fields,
                 deployment_name=deployment_name or class_config_dict.get(CONFIG_CLASS_DEPLOYMENT_NAME_ATTR),
                 deployment_field=deployment_field,
@@ -212,6 +219,11 @@ class Confident(BaseModel):
 
         Args:
             specs: The specifications of the config object.
+
+        Raises:
+            ValueError -
+                If file is not exists and ignore_missing_files=False.
+                If the file is not in a supported format.
         """
         file_properties = {}
         for file_path in specs.files:
@@ -240,6 +252,9 @@ class Confident(BaseModel):
         """
         default_properties = {}
         for field_name, model_field in self.__fields__.items():
+            # If the field is required, there is no default value to load.
+            if model_field.required:
+                continue
             # Uses `pydantic` ModelField to retrieve the default values of the model.
             default_value = model_field.get_default()
             default_properties[field_name] = ConfigProperty(
@@ -260,6 +275,13 @@ class Confident(BaseModel):
         Args:
             specs: Config specifications object.
             all_properties: All loaded properties to find the deployment attribute in.
+
+        Raises:
+            ValueError - If wrong combination or values of fields is detected in the following cases:
+                If `deployment_field` and also `deployment_name` are present.
+                If no `deployment_config` is provided.
+                If the `deployment_name` is not of type `str`.
+                If the `deployment_field` appears inside the `deployment_config`.
         """
         deployment_name = specs.deployment_name
         deployment_field = specs.deployment_field
@@ -293,7 +315,7 @@ class Confident(BaseModel):
 
             if not isinstance(deployment_name, str):
                 raise ValueError(
-                    f'{deployment_field=} is not valid. Value has to be <str> not {deployment_name} '
+                    f'{deployment_field=} is not valid. Value has to be <str> not "{deployment_name}" '
                     f'type={type(deployment_name)}'
                 )
             deployment = deployment_config.get(deployment_name)
@@ -389,7 +411,7 @@ class Confident(BaseModel):
             return explicit_deployment_field
         if explicit_deployment_field and properties_marked_as_deployment_field:
             raise ValueError(
-                f'Cannot have both explicit `deployment_field` arg and also `DeploymentField()` '
+                f'Cannot have both explicit `deployment_field` and also `DeploymentField()` '
                 f'in {self.__class__.__name__} declaration'
             )
         if len(properties_marked_as_deployment_field) > 1:
