@@ -43,6 +43,20 @@ def validate_file_not_exists(file_name: str) -> None:
         raise FileExistsError(f'File {file_name} should not exists while tests run.')
 
 
+def generate_temporary_file(file_name: str, data: dict, file_format: str = 'json') -> str:
+    validate_file_not_exists(file_name=file_name)
+
+    with open(file_name, 'w') as file:
+        if file_format == 'yaml':
+            yaml.safe_dump(data, file)
+        else:
+            json.dump(data, file)
+
+    yield file_name
+
+    os.remove(file_name)
+
+
 # Test fields and values:
 @fixture
 def sample_1():
@@ -89,44 +103,17 @@ def sample_5():
 # Temporary test files:
 @fixture
 def json_config_file_path_1(sample_1) -> str:
-    data = sample_1
-    file_name = SAMPLE_1_FILE_NAME
-    validate_file_not_exists(file_name=file_name)
-
-    with open(file_name, 'w') as file:
-        json.dump(data, file)
-
-    yield file_name
-
-    os.remove(file_name)
+    yield from generate_temporary_file(data=sample_1, file_name=SAMPLE_1_FILE_NAME)
 
 
 @fixture
 def json_config_file_path_2(sample_2) -> str:
-    data = sample_2
-    file_name = SAMPLE_2_FILE_NAME
-    validate_file_not_exists(file_name=file_name)
-
-    with open(file_name, 'w') as file:
-        json.dump(data, file)
-
-    yield file_name
-
-    os.remove(file_name)
+    yield from generate_temporary_file(data=sample_2, file_name=SAMPLE_2_FILE_NAME)
 
 
 @fixture
 def yaml_config_file_path_3(sample_3) -> str:
-    data = sample_3
-    file_name = SAMPLE_3_FILE_NAME
-    validate_file_not_exists(file_name=file_name)
-
-    with open(file_name, 'w') as file:
-        yaml.safe_dump(data, file)
-
-    yield file_name
-
-    os.remove(file_name)
+    yield from generate_temporary_file(file_name=SAMPLE_3_FILE_NAME, data=sample_3, file_format='yaml')
 
 
 @fixture
@@ -145,16 +132,7 @@ def env_config_file_path_1(sample_1) -> str:
 
 @fixture
 def specs_file_path_1(sample_1) -> str:
-    data = {'explicit_fields': sample_1}
-    file_name = SPECS_1_FILE_NAME
-    validate_file_not_exists(file_name=file_name)
-
-    with open(file_name, 'w') as file:
-        json.dump(data, file)
-
-    yield file_name
-
-    os.remove(file_name)
+    yield from generate_temporary_file(file_name=SPECS_1_FILE_NAME, data={'explicit_fields': sample_1})
 
 
 # Test deployment configs:
@@ -182,16 +160,9 @@ def sample_4_with_deployment_field(sample_4) -> Dict[str, Any]:
 
 @fixture
 def json_deployment_config_file_path_4_5(deployment_config_samples_4_5) -> str:
-    data = deployment_config_samples_4_5
-    file_name = DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME
-    validate_file_not_exists(file_name=file_name)
-
-    with open(file_name, 'w') as file:
-        json.dump(data, file)
-
-    yield file_name
-
-    os.remove(file_name)
+    yield from generate_temporary_file(
+        file_name=DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME, data=deployment_config_samples_4_5
+    )
 
 
 # Test input BaseModels:
