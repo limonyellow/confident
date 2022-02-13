@@ -59,11 +59,13 @@ class ConfidentConfigSpecs(BaseModel):
 
 class Confident(BaseModel):
     """
-    By inheriting from this class the inheriting object will have its field values filled in the next order:
+    By inheriting from this class the inheriting object will have its field values filled in the next order
+    (can be changed by providing `source_priority` list):
     - Explicit key-value arguments.
-    - Files of environment variables ('.env' files).
-    - Environment variables of the operating system.
+    - Environment variables.
+    - Deployment config files.
     - Config files.
+    - Default values.
     """
     __slots__ = (SPECS_ATTR, FULL_CONFIG_ATTR, ALL_LOADED_CONFIG_ATTR)
 
@@ -138,7 +140,7 @@ class Confident(BaseModel):
                 creation_path=caller_location,
                 source_priority=(
                     source_priority or class_config_dict.get(CONFIG_CLASS_SOURCE_PRIORITY_ATTR) or
-                    SOURCE_PRIORITY_PREFER_FILES if prefer_files else SOURCE_PRIORITY_PREFER_FILES
+                    (SOURCE_PRIORITY_PREFER_FILES if prefer_files else DEFAULT_SOURCE_PRIORITY)
                 )
             )
 
