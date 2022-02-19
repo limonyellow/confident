@@ -307,7 +307,7 @@ class Confident(BaseModel):
             deployment = deployment_config.get(deployment_name)
         if deployment_field:
             # Search for the deployment name in all possible sources ordered by priority.
-            for source in reversed(dict.fromkeys(specs.source_priority).keys()):
+            for source in dict.fromkeys(specs.source_priority).keys():
                 if source == ConfigSource.deployment:
                     continue
                 config_property = all_properties[source].get(deployment_field)
@@ -383,7 +383,9 @@ class Confident(BaseModel):
             The converted origin value. Can also be untouched.
         """
         model_field = self.__fields__.get(property_name)
-        if model_field and isinstance(origin_value, model_field.type_):
+        # model_field.outer_type_ can be type annotation and not type.
+        if (model_field and isinstance(model_field.outer_type_, type)
+                and isinstance(origin_value, model_field.outer_type_)):
             return origin_value
         if isinstance(origin_value, str):
             try:
@@ -404,7 +406,6 @@ class Confident(BaseModel):
         Raises:
             ValueError - If more than one deployment fields is received.
         """
-        # any([all(t) for t in [(True, False), (True, False), (False, False)]])
         properties_marked_as_deployment_field = [
             name for name, model_field in self.__fields__.items() if
             model_field.field_info.extra.get('deployment_field')
