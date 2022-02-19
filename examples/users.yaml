@@ -1,0 +1,9 @@
+users_mapping:
+  orangeJuice:
+    name: orange
+    last_name: juice
+    email: orange@mail.com
+  applePie:
+    name: apple
+    last_name: pi
+    email: pie@mail.com
