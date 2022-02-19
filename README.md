@@ -95,8 +95,8 @@ print(config)
 
 ### Load deployment configs
 Deployment config in Confident is basically a dictionary of configurations values that only one will be loaded in execution time
-depends on a given key. 
-This key is called `deployment_field` and it is one of the config object properties.  
+depends on a given `deployment_name`. 
+`deployment_name` can be determent explicitly or according to the value of `deployment_field` which is one of the config object properties.  
 For having the following deployment configurations (can also specified in a `json` or `yaml` file):
 ```python
 multi_configs = {
@@ -153,6 +153,7 @@ config_b = MainConfig(deployment_field='current_deployment', deployments='app/co
 print(config_b)
 #> current_deployment='local' host='localhost' port=5000 log_level='debug'
 ```
+In the above example the `deployment_field` is `current_deployment`, the `deployment_name` in run time is `local` so the matching properties are loaded from the `deployment_config`.  
 Notice that the `deployment_field` as every other field, can be loaded from a source.
 ```python
 os.environ['current_deployment'] = 'dev'  # Setting the field as an environment variable.
@@ -161,10 +162,10 @@ print(config_c)
 #> current_deployment='dev' host='http://dev_server' port=5000 log_level='debug'
 ```
 Selecting the `deployment_field` can be done in class definition using `DeploymentField`.  
-`DeploymentField` has the same functionality as pydantic [`Field`](https://pydantic-docs.helpmanual.io/usage/schema/#field-customization).
+`DeploymentField` has the same functionality as pydantic [`Field`](https://pydantic-docs.helpmanual.io/usage/schema/#field-customization).  
+Other option, is to declare the `deployment_field` inside a `ConfidentConfig` class (See below).
+#### Declaration with `DeploymentField`:
 ```python
-import os
-
 from confident import Confident, DeploymentField
 
 class MainConfig(Confident):
@@ -178,9 +179,68 @@ config_d = MainConfig(deployments='app/configs.json')  # <-- No need to mention 
 print(config_d)
 #> deployment='prod' host='https://prod_server' port=5000 log_level='info'
 ```
+#### Declaration with `ConfidentConfig` class:
+```python
+from confident import Confident
+
+class MainConfig(Confident):
+    deployment: str = 'local'  
+    host: str
+    port: int = 5000
+    log_level: str = 'error'
+    
+    class ConfidentConfig:
+        deployment_field = 'deployment'  # <-- Marking `deployment` as our `deployment_field`.
+```
+#### Usage is the same in both methods:
+```python
+import os
+
+os.environ['deployment'] = 'prod'
+
+config_d = MainConfig(deployments='app/configs.json')  # <-- No need to mention the `deployment_field`.
+print(config_d)
+#> deployment='prod' host='https://prod_server' port=5000 log_level='info'
+```
+
+### `ConfidentConfig` class - Defining object specifications 
+In addition to defining the object's behaviour by inserting key-value arguments, 
+it is possible to define several specifications in the class declaration:
+```python
+from confident import Confident
+
+class MyConfig(Confident):
+    title: str
+    port: int = 5000
+    retry: bool = False
+
+    class ConfidentConfig:  # In this class the specifications of `MyConfig` will be defined.
+        deployment_config = 'deploy.json'
+        files = ['app_config/config1.json', 'app_config/config2.yaml']
+        ignore_missing_files = True
+```
+This is equivalent to:
+```python
+from confident import Confident
+
+class MyConfig(Confident):
+    title: str
+    port: int = 5000
+    retry: bool = False
+
+config = MyConfig(
+    deployment_config='deploy.json',
+    files=['app_config/config1.json', 'app_config/config2.yaml'],
+    ignore_missing_files = True
+)
+```
+This configuration method is similar to `pydantic` [`Config`](https://pydantic-docs.helpmanual.io/usage/model_config/) model.
+
+## Examples
+More examples can be found in the project's [repository](https://github.com/limonyellow/confident).
 
 ## Contributing
-To contribute to Confident, please make sure that any new features or changes to existing functionality include test coverage.
+To contribute to Confident, please make sure any new features or changes to existing functionality include test coverage.
 
 ### Creating Distribution
 Build the distribution:  
