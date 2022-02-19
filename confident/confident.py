@@ -130,7 +130,7 @@ class Confident(BaseModel):
                 specs_path=specs_path,
                 env_files=env_files,
                 files=files,
-                prefer_file=prefer_files,
+                prefer_files=prefer_files,
                 ignore_missing_files=ignore_missing_files,
                 explicit_fields=fields,
                 deployment_name=deployment_name or class_config_dict.get(CONFIG_CLASS_DEPLOYMENT_NAME_ATTR),
@@ -285,6 +285,7 @@ class Confident(BaseModel):
                 If the `deployment_name` is not of type `str`.
                 If the `deployment_field` appears inside the `deployment_config`.
         """
+        # Extracts the deployment metadata field and validates them.
         deployment_name = specs.deployment_name
         deployment_field = specs.deployment_field
         deployment_config = specs.deployment_config
@@ -295,7 +296,7 @@ class Confident(BaseModel):
         if deployment_field is not None and deployment_name is not None:
             raise ValueError('Cannot have both `deployment_field` and `deployment_name`. Only one can be used.')
         if deployment_config is None:
-            raise ValueError('Environment default is enabled but no `deployment_config` was provided.')
+            raise ValueError('No `deployment_config` was provided.')
         if isinstance(deployment_config, Path):
             deployment_location = deployment_config
             deployment_config = load_file(deployment_location)
@@ -303,6 +304,7 @@ class Confident(BaseModel):
         deployment = {}
         deployment_properties = {}
 
+        # According to the deployment name, extracts the chosen deployment.
         if deployment_name:
             deployment = deployment_config.get(deployment_name)
         if deployment_field:
@@ -322,9 +324,13 @@ class Confident(BaseModel):
                 )
             deployment = deployment_config.get(deployment_name)
 
+        if deployment is None:
+            raise KeyError(f'No matching deployment to {deployment_name=}. Check your `deployment_config`')
+
         if isinstance(deployment, str):
             deployment = load_file(deployment)
 
+        # Creates the `ConfigProperty` dictionary.
         for name, value in deployment.items():
             if name == deployment_field:
                 raise ValueError(
