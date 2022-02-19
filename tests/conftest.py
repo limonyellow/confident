@@ -20,7 +20,7 @@ SAMPLE_1_ENV_FILE_NAME = 'temp_conf1.env'
 # Spec files:
 SPECS_1_FILE_NAME = 'temp_specs1.json'
 # Deployment config files:
-DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME = "temp_deployment_config.json"
+DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME = 'temp_deployment_config.json'
 
 # Test field names:
 SAMPLE_1_FIELD_1 = 'title'
