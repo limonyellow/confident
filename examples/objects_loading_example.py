@@ -32,4 +32,3 @@ if __name__ == '__main__':
 
     config_b = AppConfig(files='config.yaml')
     print(f'{config_b=}')
-
