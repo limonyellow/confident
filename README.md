@@ -156,8 +156,8 @@ print(config_b)
 
 
 ### deployment_field
-If we want more flexibility in the selecting the deployment to load, we can use `deployment_field`.  
-`deployment_field` is a field declared in the `Confident` object that its value will deter what will be the `deployment_name`.
+If we want more flexibility in selecting the deployment to load, we can use a property to do so.  
+`deployment_field` is a field declared in the `Confident` object that its value will define what will be the `deployment_name`.
 ```python
 from confident import Confident
 
@@ -169,14 +169,8 @@ class MainConfig(Confident):
 ```
 Now we can create the config object:
 ```python
-# Using python dict:
 config_a = MainConfig(deployment_field='current_deployment', deployments=multi_configs)
 print(config_a)
-#> current_deployment='local' host='localhost' port=5000 log_level='debug'
-
-# Same, but from a file path:
-config_b = MainConfig(deployment_field='current_deployment', deployments='app/configs.json')
-print(config_b)
 #> current_deployment='local' host='localhost' port=5000 log_level='debug'
 ```
 In the above example the `deployment_field` is `current_deployment`, the `deployment_name` in run time is `local` so the matching properties are loaded from the `deployment_config`.  
@@ -189,7 +183,7 @@ print(config_c)
 ```
 Selecting the `deployment_field` can be done in class definition using `DeploymentField`.  
 `DeploymentField` has the same functionality as pydantic [`Field`](https://pydantic-docs.helpmanual.io/usage/schema/#field-customization).  
-Other option, is to declare the `deployment_field` inside a `ConfidentConfig` class (See below).
+Moreover, it is possible to declare the `deployment_field` inside a `ConfidentConfig` class (See below).
 #### Declaration with `DeploymentField`:
 ```python
 from confident import Confident, DeploymentField
@@ -199,11 +193,6 @@ class MainConfig(Confident):
     host: str
     port: int = 5000
     log_level: str = 'error'
-
-os.environ['deployment'] = 'prod'
-config_d = MainConfig(deployments='app/configs.json')  # <-- No need to mention the `deployment_field`.
-print(config_d)
-#> deployment='prod' host='https://prod_server' port=5000 log_level='info'
 ```
 #### Declaration with `ConfidentConfig` class:
 ```python
@@ -224,8 +213,8 @@ import os
 
 os.environ['deployment'] = 'prod'
 
-config_d = MainConfig(deployments='app/configs.json')  # <-- No need to mention the `deployment_field`.
-print(config_d)
+config = MainConfig(deployments='app/configs.json')  # <-- No need to mention the `deployment_field`.
+print(config)
 #> deployment='prod' host='https://prod_server' port=5000 log_level='info'
 ```
 
@@ -284,15 +273,15 @@ class MyConfig(Confident):
 
 ## Visibility and Validation
 ### Errors
-In order to avoid misconfigurations `Confident` will supply indicative errors in case of wrong values or wrong sequence of arguments. 
+In order to avoid misconfigurations, `Confident` will supply indicative errors in case of wrong values or wrong sequence of arguments. 
 For instance:
-- Wrong files provided.
+- Wrong or missing files provided.
 - Inserting both `deployment_name` and `deployment_field` (causing ambiguous deployment selection)
 - Wrong types or missing values (by `pydantic` validation mechanism)
 
 ### Multiple sources recognition
 Loading fields to `Confident` object from multiple sources can be complicated and should be reduced to minimum. Nevertheless, in some cases it can be required.  
-In order to monitor which fields were loaded from what source, `full_details()` can be used. 
+In order to monitor which fields were loaded from what source, `full_details()` can be used.  
 Notice the difference between the `source_type`s:
 
 ```python
