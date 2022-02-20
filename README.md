@@ -136,12 +136,38 @@ The config class definition can be as follows:
 from confident import Confident
 
 class MainConfig(Confident):
-    current_deployment: str = 'local'  # <-- This will be our `deployment_field`.
     host: str
     port: int = 5000
     log_level: str = 'error'
 ```
 Now we can create the config object in several ways:
+```python
+# Using python dict:
+config_a = MainConfig(deployment_name='local', deployments=multi_configs)
+print(config_a)
+#> host='localhost' port=5000 log_level='debug'
+
+# Same, but from a file path:
+config_b = MainConfig(deployment_name='local', deployments='app/configs.json')
+print(config_b)
+#> host='localhost' port=5000 log_level='debug'
+```
+
+
+
+### deployment_field
+If we want more flexibility in the selecting the deployment to load, we can use `deployment_field`.  
+`deployment_field` is a field declared in the `Confident` object that its value will deter what will be the `deployment_name`.
+```python
+from confident import Confident
+
+class MainConfig(Confident):
+    current_deployment: str = 'local'  # <-- This will be our `deployment_field`.
+    host: str
+    port: int = 5000
+    log_level: str = 'error'
+```
+Now we can create the config object:
 ```python
 # Using python dict:
 config_a = MainConfig(deployment_field='current_deployment', deployments=multi_configs)
@@ -154,7 +180,7 @@ print(config_b)
 #> current_deployment='local' host='localhost' port=5000 log_level='debug'
 ```
 In the above example the `deployment_field` is `current_deployment`, the `deployment_name` in run time is `local` so the matching properties are loaded from the `deployment_config`.  
-Notice that the `deployment_field` as every other field, can be loaded from a source.
+Notice that the `deployment_field` as every other field, can be loaded from a source:
 ```python
 os.environ['current_deployment'] = 'dev'  # Setting the field as an environment variable.
 config_c = MainConfig(deployment_field='current_deployment', deployments='app/configs.json')
@@ -203,7 +229,7 @@ print(config_d)
 #> deployment='prod' host='https://prod_server' port=5000 log_level='info'
 ```
 
-### `ConfidentConfig` class - Defining object specifications 
+## `ConfidentConfig` class
 In addition to defining the object's behaviour by inserting key-value arguments, 
 it is possible to define several specifications in the class declaration:
 ```python
@@ -235,6 +261,73 @@ config = MyConfig(
 )
 ```
 This configuration method is similar to `pydantic` [`Config`](https://pydantic-docs.helpmanual.io/usage/model_config/) model.
+
+## Changing the loading priority
+It is possible to change the order that fields from different sources are loaded.
+If a field value is present in multiple sources, the value from the highest priority source will be chosen and override the others.  
+`source_priority` is an attribute that holds a list of `ConfigSource` enums - The first will have the highest priority and the last will have the lowest.  
+**Sources that their enum will not appear in the `source_priority` list, will not be loaded to the created object.**
+```python
+from confident import Confident, ConfigSource
+
+class MyConfig(Confident):
+    host: str
+    port: int = 5000
+
+    class ConfidentConfig:
+        # Here we define that environment vars will have the highest priority (even before explicit values)
+        # Values from files and deployments will have lower priority than default values.
+        source_priority = [
+            ConfigSource.env_var, ConfigSource.explicit, ConfigSource.class_default, ConfigSource.deployment, ConfigSource.file
+        ]
+```
+
+## Visibility and Validation
+### Errors
+In order to avoid misconfigurations `Confident` will supply indicative errors in case of wrong values or wrong sequence of arguments. 
+For instance:
+- Wrong files provided.
+- Inserting both `deployment_name` and `deployment_field` (causing ambiguous deployment selection)
+- Wrong types or missing values (by `pydantic` validation mechanism)
+
+### Multiple sources recognition
+Loading fields to `Confident` object from multiple sources can be complicated and should be reduced to minimum. Nevertheless, in some cases it can be required.  
+In order to monitor which fields were loaded from what source, `full_details()` can be used. 
+Notice the difference between the `source_type`s:
+
+```python
+import os
+from typing import List
+
+from confident import Confident
+
+class AppConfig(Confident):
+    title: str = 'my_application'
+    timeout: int
+    input_paths: List[str]
+
+os.environ['input_paths'] = '["/tmp/input_a", "/tmp/input_b"]'
+
+config = AppConfig(files='config.yaml')
+
+print(config.full_details())
+#> {
+# 'title': ConfigProperty(name='title', value='my_application', origin_value='my_application', source_name='AppConfig', source_type='class_default', source_location=WindowsPath('example.py')), 
+# 'timeout': ConfigProperty(name='timeout', value=60, origin_value=60, source_name='config.yaml', source_type='file', source_location=WindowsPath('config.yaml')), 
+# 'input_paths': ConfigProperty(name='input_paths', value=['/tmp/input_a', '/tmp/input_b'], origin_value='["/tmp/input_a", "/tmp/input_b"]', source_name='input_paths', source_type='env_var', source_location='input_paths'), 
+# }
+```
+
+### Confident Object Creation location
+The position of the the `Confident` object declaration:
+```python
+config.specs().class_path
+```
+The position of the the `Confident` object instance creation:
+```python
+config.specs().creation_path
+```
+
 
 ## Examples
 More examples can be found in the project's [repository](https://github.com/limonyellow/confident).
