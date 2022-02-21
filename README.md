@@ -1,11 +1,12 @@
 # Confident
 Confident helps you create configuration objects from multiple sources such as files and environment variables.  
-Confident configuration objects are data models that enforce validation and type hints by using [pydantic](https://pydantic-docs.helpmanual.io/) library.
-For simple configuration loading from environment variables, you might want to check pydantic's [`BaseSettings`](https://pydantic-docs.helpmanual.io/usage/settings/) model.
+Confident config objects are data models that enforce validation and type hints by using [pydantic](https://pydantic-docs.helpmanual.io/) library.
 
 With Confident you can manage multiple configurations depend on the environment your code is deployed.
-While having lots of flexibility how to describe your config objects, Confident will provide visibility of the loading config 
-process and help you expose mis-configuration as soon a possible.
+While having lots of flexibility how to describe your config objects, Confident will provide visibility of the process 
+and help you expose misconfiguration as soon as possible.
+
+For simple configuration loading from environment variables, you might want to check pydantic's [`BaseSettings`](https://pydantic-docs.helpmanual.io/usage/settings/) model.
 
 ## Example
 ```python
