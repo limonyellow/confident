@@ -3,7 +3,7 @@ from typing import Any, Union
 
 from pydantic import BaseModel
 
-from .config_source import ConfigSource
+from confident.config_source import ConfigSource
 
 
 class ConfigProperty(BaseModel):
