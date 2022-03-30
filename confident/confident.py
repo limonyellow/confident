@@ -8,9 +8,9 @@ from typing import Union, List, Any, Dict, Optional
 
 from pydantic import BaseModel
 
-from .config_property import ConfigProperty
-from .config_source import ConfigSource
-from .utils import load_file, load_env_files
+from confident.config_property import ConfigProperty
+from confident.config_source import ConfigSource
+from confident.utils import load_file, load_env_files
 
 SPECS_ATTR = '_specs'
 FULL_CONFIG_ATTR = '_full'
