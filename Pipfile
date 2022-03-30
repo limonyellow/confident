@@ -12,6 +12,3 @@ twine = "*"
 pydantic = "*"
 pyyaml = "*"
 python-dotenv = "*"
-
-[requires]
-python_version = "3.8,3.9,3.10"
