@@ -1,7 +1,7 @@
 import pytest
 
 from confident import Confident, DeploymentField
-from conftest import DEPLOY_CONFIG_SAMPLE_1_FIELD_1, DEPLOY_FIELD_1, SAMPLE_4_FIELD_1
+from tests.conftest import DEPLOY_CONFIG_SAMPLE_1_FIELD_1, DEPLOY_FIELD_1, SAMPLE_4_FIELD_1
 
 
 def test__load_deployment_config__deploy_name(create_config_class4, json_deployment_config_file_path_4_5, sample_4):
