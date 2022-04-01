@@ -1,5 +1,8 @@
 Confident
 =========
+.. image:: https://img.shields.io/pypi/pyversions/confident?style=plastic   :alt: PyPI - Python Version
+.. image:: https://img.shields.io/github/workflow/status/limonyellow/confident/Python%20package/main?style=plastic   :alt: GitHub Workflow Status (branch)
+.. image:: https://img.shields.io/github/license/limonyellow/confident?style=plastic   :alt: GitHub License
 
 **Confident** helps you create configuration objects from multiple sources such as files and environment variables.
 Confident config objects are data models that enforce validation and type hints by using `pydantic <https://pydantic-docs.helpmanual.io/>`_ library.
