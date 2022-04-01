@@ -1,6 +1,7 @@
 Confident
 =========
 .. image:: https://img.shields.io/pypi/pyversions/confident?style=plastic   :alt: PyPI - Python Version
+.. image:: https://img.shields.io/pypi/v/confident?style=plastic   :alt: PyPI
 .. image:: https://img.shields.io/github/workflow/status/limonyellow/confident/Python%20package/main?style=plastic   :alt: GitHub Workflow Status (branch)
 .. image:: https://img.shields.io/github/license/limonyellow/confident?style=plastic   :alt: GitHub License
 
