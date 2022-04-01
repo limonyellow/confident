@@ -1,5 +1,6 @@
 # Confident
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/confident?style=plastic)
+![PyPI](https://img.shields.io/pypi/v/confident?style=plastic)
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/limonyellow/confident/Python%20package/main?style=plastic)
 ![GitHub](https://img.shields.io/github/license/limonyellow/confident?style=plastic)
 
