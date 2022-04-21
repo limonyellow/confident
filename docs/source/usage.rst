@@ -17,8 +17,11 @@ Install using pip:
 Load Config Files
 -----------------
 Confident supports `json`, `yaml` and `.env` files.
-**`app_config/config1.json`**
+
+**app_config/config1.json**
+
 .. code-block:: console
+
     {
       "title": "my_app_1",
       "retry": true,
@@ -26,13 +29,17 @@ Confident supports `json`, `yaml` and `.env` files.
     }
 
 
-**`app_config/config2.yaml`**
+**app_config/config2.yaml**
+
 .. code-block:: console
+
     title: my_yaml_app
     port: 3030
 
 
-.. code-block:: console
+.. code-block:: python
+    :linenos:
+
     from confident import Confident
 
 
