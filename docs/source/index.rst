@@ -16,9 +16,13 @@ With Confident you can manage multiple configurations depend on the environment 
 While having lots of flexibility how to describe your config objects, Confident will provide visibility of the process
 and help you expose misconfiguration as soon as possible.
 
+.. note::
+    The docs are still under construction.
+
 Example
 -------
-.. code-block:: console
+.. code-block:: python
+    :linenos:
 
     import os
 
