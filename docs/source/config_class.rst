@@ -56,15 +56,15 @@ If a field value is present in multiple sources, the value from the highest prio
 .. code-block:: python
     :linenos:
 
-from confident import Confident, ConfigSource
+    from confident import Confident, ConfigSource
 
-    class MyConfig(Confident):
-        host: str
-        port: int = 5000
+        class MyConfig(Confident):
+            host: str
+            port: int = 5000
 
-        class ConfidentConfig:
-            # Here we define that environment vars will have the highest priority (even before explicit values)
-            # Values from files and deployments will have lower priority than default values.
-            source_priority = [
-                ConfigSource.env_var, ConfigSource.explicit, ConfigSource.class_default, ConfigSource.deployment, ConfigSource.file
-            ]
+            class ConfidentConfig:
+                # Here we define that environment vars will have the highest priority (even before explicit values).
+                # Values from files and deployments will have lower priority than default values.
+                source_priority = [
+                    ConfigSource.env_var, ConfigSource.explicit, ConfigSource.class_default, ConfigSource.deployment, ConfigSource.file
+                ]
