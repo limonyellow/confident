@@ -8,10 +8,8 @@ The details can be logged/printed and provide clarity about the source of every 
 Multiple Sources Recognition
 ----------------------------
 
-Loading fields to `Confident` object from multiple sources can be complicated and should be reduced to minimum.
-Nevertheless, in some cases it can be required.
 In order to monitor which fields were loaded from what source, `full_details()` can be used.
-Notice the difference between the `source_type`s:
+Notice the difference between the source types:
 
 .. code-block:: python
     :linenos:

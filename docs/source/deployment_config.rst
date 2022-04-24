@@ -5,7 +5,7 @@ Deployment config
 
 Deployment config in Confident is basically a dictionary of configurations values.
 Only one configuration will be loaded in execution time depends on a given `deployment_name`.
-Deployment configurations can be either python dict or a file (json\yaml).
+Deployment configurations can be either python dict or a file (json or yaml).
 
 .. code-block:: python
     :linenos:
@@ -148,7 +148,7 @@ Moreover, it is possible to declare the `deployment_field` inside a `ConfidentCo
             deployment_field = 'deployment'  # <-- Marking `deployment` as our `deployment_field`.
 
 
-Usage is the same in both methods:
+Usage is the same in both ways:
 
 .. code-block:: python
     :linenos:
