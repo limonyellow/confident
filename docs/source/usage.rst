@@ -14,6 +14,49 @@ Install using pip:
 
    (.venv) $ pip install confident
 
+Load Environment Variables
+--------------------------
+Simply create an object.
+Confident will load the property value from environment variable with the same name if exists.
+
+.. code-block:: python
+    :linenos:
+
+    import os
+
+    from confident import Confident
+
+
+    os.environ['port'] = 3000
+
+    class MyConfig(Confident):
+        port: int
+
+    config = MyConfig()
+
+    print(config)
+    #> port=3000
+
+
+Load Default Values
+-------------------
+Like in `dataclass` and `pydantic` classes, it is possible to declare default values of properties.
+
+.. code-block:: python
+    :linenos:
+
+    from confident import Confident
+
+
+    class MyConfig(Confident):
+        port: int = 3333
+
+    config = MyConfig()
+
+    print(config)
+    #> port=3333
+
+
 Load Config Files
 -----------------
 Confident supports `json`, `yaml` and `.env` files.
@@ -52,9 +95,3 @@ Confident supports `json`, `yaml` and `.env` files.
 
     print(config)
     #> title='my_app_1' port=3030 retry=True
-
-.. note::
-    The docs are still under construction.
-
-
-
