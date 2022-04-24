@@ -82,3 +82,4 @@ Contents
     deployment_config
     config_class
     visibility
+    validation
