@@ -9,8 +9,7 @@
 name: Upload Python Package
 
 on:
-  pull_request:
-    types: [ labeled ]
+  workflow_dispatch
 
 permissions:
   contents: read
