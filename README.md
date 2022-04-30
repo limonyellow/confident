@@ -6,6 +6,7 @@
 ### **Version 2 with improved features and design is here:**
 - [Pypi](https://pypi.org/project/confident/)
 - [Github](https://github.com/limonyellow/confident)
+
 ---
 
 **Documentation**: [https://confident.readthedocs.io/en/latest/](https://confident.readthedocs.io/en/latest/)
