@@ -12,12 +12,10 @@ def test__config_class_loading__files():
     class MyConfig(Confident):
         property_a: str = 'nothing'
 
-        class ConfidentConfig:
-            env_files = 'temp.env'
+        class Config:
             files = 'temp.json'
-            prefer_files = True
             ignore_missing_files = True
-            source_priority = [ConfigSource.explicit]
+            source_priority = [ConfigSource.init]
 
     # Act
     config = MyConfig()
@@ -25,11 +23,9 @@ def test__config_class_loading__files():
     # Assert
     specs = config.specs()
     # `env_files` and `files` are inserted into a list as Path objects.
-    assert str(specs.env_files.pop()) == 'temp.env'
     assert str(specs.files.pop()) == 'temp.json'
-    assert specs.prefer_files is True
     assert specs.ignore_missing_files is True
-    assert specs.source_priority == [ConfigSource.explicit]
+    assert specs.source_priority == [ConfigSource.init]
 
 
 def test__config_class_loading__deployment_name(json_deployment_config_file_path_4_5):
@@ -40,10 +36,12 @@ def test__config_class_loading__deployment_name(json_deployment_config_file_path
     # Arrange:
     class MyConfig(Confident):
         property_a: str = 'nothing'
+        host: str
+        port: str
 
-        class ConfidentConfig:
-            deployment_config = 'temp_deployment_config.json'
-            deployment_name = 'prod'
+        class Config:
+            config_map = 'temp_deployment_config.json'
+            map_name = 'prod'
 
     # Act
     config = MyConfig()
@@ -51,8 +49,8 @@ def test__config_class_loading__deployment_name(json_deployment_config_file_path
     # Assert
     specs = config.specs()
     # Also check that the values matches the test input from conftest.py.
-    assert str(specs.deployment_config) == 'temp_deployment_config.json' == DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME
-    assert specs.deployment_name == 'prod' == DEPLOY_CONFIG_SAMPLE_1_FIELD_1
+    assert str(specs.config_map) == 'temp_deployment_config.json' == DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME
+    assert specs.map_name == 'prod' == DEPLOY_CONFIG_SAMPLE_1_FIELD_1
 
 
 def test__config_class_loading__deployment_field(json_deployment_config_file_path_4_5):
@@ -63,10 +61,12 @@ def test__config_class_loading__deployment_field(json_deployment_config_file_pat
     # Arrange:
     class MyConfig(Confident):
         property_a: str = 'prod'
+        host: str
+        port: str
 
-        class ConfidentConfig:
-            deployment_config = 'temp_deployment_config.json'
-            deployment_field = 'property_a'
+        class Config:
+            config_map = 'temp_deployment_config.json'
+            map_field = 'property_a'
 
     # Act
     config = MyConfig()
@@ -74,5 +74,5 @@ def test__config_class_loading__deployment_field(json_deployment_config_file_pat
     # Assert
     specs = config.specs()
     # Also check that the values matches the test input from conftest.py.
-    assert str(specs.deployment_config) == 'temp_deployment_config.json' == DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME
-    assert specs.deployment_field == 'property_a'
+    assert str(specs.config_map) == 'temp_deployment_config.json' == DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME
+    assert specs.map_field == 'property_a'

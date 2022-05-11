@@ -9,50 +9,50 @@ from confident import Confident
 from confident.config_source import ConfigSource
 from tests.conftest import generate_temporary_file
 
-EXPLICIT_A = {
-    'ex_field': 'ex'
+INIT_A = {
+    'init_field': 'init'
 }
 ENV_VARS_A = {
-    'ex_field': 'env',
+    'init_field': 'env',
     'env_field': 'env'
 }
 DEPLOYMENT_NAME = 'default_deploy'
 DEPLOYMENT_CONFIG_A = {
     DEPLOYMENT_NAME: {
-        'ex_field': 'deploy',
+        'init_field': 'deploy',
         'env_field': 'deploy',
         'deploy_field': 'deploy'
     }
 }
 CONFIG_FILE_A_NAME = 'test.json'
 CONFIG_FILE_A = {
-    'ex_field': 'file',
+    'init_field': 'file',
     'env_field': 'file',
     'deploy_field': 'file',
     'file_field': 'file'
 }
 DEFAULT_VALUES_A = {
-    'ex_field': 'default',
+    'init_field': 'default',
     'env_field': 'default',
     'deploy_field': 'default',
     'file_field': 'default',
     'default_field': 'default'
 }
 SOURCE_PRIORITY_A = [
-    ConfigSource.explicit, ConfigSource.env_var, ConfigSource.deployment, ConfigSource.file, ConfigSource.class_default
+    ConfigSource.init, ConfigSource.env_var, ConfigSource.map, ConfigSource.file, ConfigSource.class_default
 ]
 RESULT_FIELDS_A = {
-    'ex_field': 'ex',
+    'init_field': 'init',
     'env_field': 'env',
     'deploy_field': 'deploy',
     'file_field': 'file',
     'default_field': 'default'
 }
 SOURCE_PRIORITY_B = [
-    ConfigSource.deployment, ConfigSource.explicit, ConfigSource.env_var, ConfigSource.file, ConfigSource.class_default
+    ConfigSource.map, ConfigSource.init, ConfigSource.env_var, ConfigSource.file, ConfigSource.class_default
 ]
 RESULT_FIELDS_B = {
-    'ex_field': 'deploy',
+    'init_field': 'deploy',
     'env_field': 'deploy',
     'deploy_field': 'deploy',
     'file_field': 'file',
@@ -60,7 +60,7 @@ RESULT_FIELDS_B = {
 }
 SOURCE_PRIORITY_C = [ConfigSource.file]
 RESULT_FIELDS_C = {
-    'ex_field': 'file',
+    'init_field': 'file',
     'env_field': 'file',
     'deploy_field': 'file',
     'file_field': 'file',
@@ -87,8 +87,8 @@ def test__priority_loading(source_priority, expected_fields, json_config_file_pa
         **{key: (type(value), value) for key, value in DEFAULT_VALUES_A.items()}
     )
     config = config_class(
-        source_priority=source_priority, fields=EXPLICIT_A, deployment_name=DEPLOYMENT_NAME,
-        deployment_config=DEPLOYMENT_CONFIG_A, files=json_config_file_path
+        **INIT_A, _source_priority=source_priority, _map_name=DEPLOYMENT_NAME,
+        _config_map=DEPLOYMENT_CONFIG_A, _files=json_config_file_path
     )
 
     assert config.dict() == expected_fields
