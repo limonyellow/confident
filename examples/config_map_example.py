@@ -13,10 +13,10 @@ class ServerConfig(Confident):
     output_paths: List[str] = ['S3://bucket_local']
 
     class Config:
-        config_map = 'config_map.json'
+        config_map = os.path.abspath(os.path.join(__file__, os.path.pardir, 'config_map.json'))
 
 
-if __name__ == '__main__':
+def main():
     # Will load deployment='local'
     config_a = ServerConfig()
     print(f'{config_a=}')
@@ -29,3 +29,8 @@ if __name__ == '__main__':
     # Will load deployment='dev'
     config_c = ServerConfig(environment='dev')
     print(f'{config_c=}')
+
+
+if __name__ == '__main__':
+    main()
+
