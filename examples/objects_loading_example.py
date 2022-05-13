@@ -21,7 +21,7 @@ class AppConfig(Confident):
 
 if __name__ == '__main__':
     # Will load from both 'config.yaml' and 'users.yaml' config files.
-    config_a = AppConfig(files=['config.yaml', 'users.yaml'])
+    config_a = AppConfig(_files=['config.yaml', 'users.yaml'])
     print(f'{config_a=}')
 
     # Will load from both 'config.yaml' and 'users.yaml' config files.
@@ -30,5 +30,5 @@ if __name__ == '__main__':
     # Environment variable will be loaded as json objects:
     os.environ['users_mapping'] = '{"mrOrange": {"name": "tim", "last_name": "ro", "email": "tim@mr.com"}}'
 
-    config_b = AppConfig(files='config.yaml')
+    config_b = AppConfig(_files='config.yaml')
     print(f'{config_b=}')
