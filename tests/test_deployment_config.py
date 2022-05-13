@@ -1,52 +1,52 @@
 import pytest
 
 from confident import Confident, MapField
-from tests.conftest import DEPLOY_CONFIG_SAMPLE_1_FIELD_1, DEPLOY_FIELD_1, SAMPLE_4_FIELD_1
+from tests.conftest import CONFIG_SAMPLE_1_FIELD_1, MAP_FIELD_1, SAMPLE_4_FIELD_1
 
 
-def test__load_deployment_config__deploy_name(create_config_class4, json_deployment_config_file_path_4_5, sample_4):
+def test__load_config_map__deploy_name(create_config_class4, json_config_map_file_path_4_5, sample_4):
     """
     Test with explicit `_map_name`.
     """
     # Act
     config = create_config_class4(
-        _map_name=DEPLOY_CONFIG_SAMPLE_1_FIELD_1, _config_map=json_deployment_config_file_path_4_5
+        _map_name=CONFIG_SAMPLE_1_FIELD_1, _config_map=json_config_map_file_path_4_5
     )
 
     # Assert
     assert config.dict() == sample_4
 
 
-def test__load_deployment_config__deploy_field(
-        create_config_class4_with_deployment_field, json_deployment_config_file_path_4_5, sample_4_with_deployment_field
+def test__load_config_map__map_field(
+        create_config_class4_with_map_field, json_config_map_file_path_4_5, sample_4_with_map_field
 ):
     """
     Test with explicit `_map_name`.
     """
     # Act
-    config = create_config_class4_with_deployment_field(
-        **{DEPLOY_FIELD_1: DEPLOY_CONFIG_SAMPLE_1_FIELD_1}, _map_field=DEPLOY_FIELD_1,
-        _config_map=json_deployment_config_file_path_4_5
+    config = create_config_class4_with_map_field(
+        **{MAP_FIELD_1: CONFIG_SAMPLE_1_FIELD_1}, _map_field=MAP_FIELD_1,
+        _config_map=json_config_map_file_path_4_5
     )
 
     # Assert
-    assert config.dict() == sample_4_with_deployment_field
+    assert config.dict() == sample_4_with_map_field
 
 
-def test__load_deployment_config_dict__deploy_field(create_config_class4, deployment_config_samples_4_5, sample_4):
+def test__load_config_map_dict__map_field(create_config_class4, config_map_samples_4_5, sample_4):
     """
     Test with explicit `_map_name` and deployment_config as dictionary.
     """
     # Act
     config = create_config_class4(
-        _map_name=DEPLOY_CONFIG_SAMPLE_1_FIELD_1, _config_map=deployment_config_samples_4_5
+        _map_name=CONFIG_SAMPLE_1_FIELD_1, _config_map=config_map_samples_4_5
     )
 
     # Assert
     assert config.dict() == sample_4
 
 
-def test__load_deployment_config__2_deploy_fields_a():
+def test__load_config_map__2_map_fields_a():
     """
     Test that map field is not explicit and declared by `MapField` at the same time.
     """
@@ -59,14 +59,18 @@ def test__load_deployment_config__2_deploy_fields_a():
         env_a: str = MapField('nothing')
 
     # Act & Assert
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as error:
         ConfigA(_map_field='env_a', _config_map={})
+    assert f'Cannot have both explicit `_map_field` and also `MapField()` in {ConfigA.__name__} declaration'\
+           in str(error.value)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as error:
         ConfigB(_map_field='env_a', _config_map={})
+    assert f'Cannot have both explicit `_map_field` and also `MapField()` in {ConfigB.__name__} declaration' \
+           in str(error.value)
 
 
-def test__load_deployment_config__2_deploy_fields_b():
+def test__load_config_map__2_map_fields_b():
     """
     Test that map field is not declared by `MapField` and in `ConfidentConfig` class at the same time.
     """
@@ -78,11 +82,12 @@ def test__load_deployment_config__2_deploy_fields_b():
             _map_field = 'env_a'
 
     # Act & Assert
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as error:
         Config(_config_map={})
+    assert 'No `config_map` was provided.' in str(error.value)
 
 
-def test__load_deployment_config__2_deploy_fields_c():
+def test__load_config_map__2_map_fields_c():
     """
     Test that map field is not declared by `MapField` more than one.
     """
@@ -92,11 +97,12 @@ def test__load_deployment_config__2_deploy_fields_c():
         env_b: str = MapField('nothing')
 
     # Act & Assert
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as error:
         Config(_config_map={})
+    assert 'Cannot have more then one `MapField()` in Config declaration' in str(error.value)
 
 
-def test__load_deployment_config__deploy_field_and_deploy_name():
+def test__load_config_map__map_field_and_deploy_name():
     """
     Test that map field and map name are not used at the same time.
     """
@@ -105,12 +111,13 @@ def test__load_deployment_config__deploy_field_and_deploy_name():
         env_a: str = 'nothing'
 
     # Act & Assert
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as error:
         Config(_map_field='env_a', _map_name='thing', _config_map={})
+    assert 'Cannot have both `map_field` and `map_name`. Only one can be used.' in str(error.value)
 
 
 @pytest.mark.parametrize('map_field, map_name', [('env_a', None), (None, 'nothing')])
-def test__load_deployment_config__no_deploy_config(map_field, map_name):
+def test__load_config_map__no_config_map(map_field, map_name):
     """
     Test that deployment config is inserted if deployment field or name is used.
     Case 1 - Only `map_field` is provided.
@@ -121,12 +128,13 @@ def test__load_deployment_config__no_deploy_config(map_field, map_name):
         env_a: str = 'nothing'
 
     # Act & Assert
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as error:
         Config(_map_field=map_field, _map_name=map_name)
+    assert 'No `config_map` was provided.' in str(error.value)
 
 
 @pytest.mark.parametrize('map_name', [True, 7])
-def test__load_deployment_config__deploy_name_is_not_valid(map_name):
+def test__load_config_map__map_name_is_not_valid(map_name):
     """
     Test that deployment name is a string.
     Case 1 - The `map_name` is type `bool`.
@@ -147,12 +155,13 @@ def test__load_deployment_config__deploy_name_is_not_valid(map_name):
         title: str
 
     # Act & Assert
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as error:
         Config(_map_field='env_a', _config_map=config_map)
+    assert f''''env_a' is not valid. Value has to be <str> not "{map_name}" type={type(map_name)}''' in str(error.value)
 
 
-def test__load_deployment_config__deploy_field_also_inside_deploy_config(
-        create_config_class4, deployment_config_samples_4_5, sample_4
+def test__load_config_map__map_field_also_inside_config_map(
+        create_config_class4, config_map_samples_4_5, sample_4
 ):
     """
     Test that the `map_field` is not appear in the 'config_map'.
@@ -181,8 +190,8 @@ def test__load_deployment_config__deploy_field_also_inside_deploy_config(
     # Act & Assert
     with pytest.raises(ValueError) as error:
         create_config_class4(
-            **{SAMPLE_4_FIELD_1: DEPLOY_CONFIG_SAMPLE_1_FIELD_1},
+            **{SAMPLE_4_FIELD_1: CONFIG_SAMPLE_1_FIELD_1},
             _map_field=SAMPLE_4_FIELD_1,
-            _config_map=deployment_config_samples_4_5
+            _config_map=config_map_samples_4_5
         )
     assert '''map_field='host' cannot appear in the map config key 'prod'.''' in str(error.value)

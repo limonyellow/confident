@@ -1,6 +1,6 @@
 from confident import Confident
 from confident.config_source import ConfigSource
-from tests.conftest import DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME, DEPLOY_CONFIG_SAMPLE_1_FIELD_1
+from tests.conftest import CONFIG_MAP_SAMPLE_1_FILE_NAME, CONFIG_SAMPLE_1_FIELD_1
 
 
 def test__config_class_loading__files():
@@ -28,7 +28,7 @@ def test__config_class_loading__files():
     assert specs.source_priority == [ConfigSource.init]
 
 
-def test__config_class_loading__deployment_name(json_deployment_config_file_path_4_5):
+def test__config_class_loading__map_name(json_config_map_file_path_4_5):
     """
     Checks if file specs properties are inserted correctly from a `ConfidentConfig` class declaration.
     Doesn't check the logic - this is done in `test_confident.py`.
@@ -40,7 +40,7 @@ def test__config_class_loading__deployment_name(json_deployment_config_file_path
         port: str
 
         class Config:
-            config_map = 'temp_deployment_config.json'
+            config_map = 'temp_config_map.json'
             map_name = 'prod'
 
     # Act
@@ -49,11 +49,11 @@ def test__config_class_loading__deployment_name(json_deployment_config_file_path
     # Assert
     specs = config.specs()
     # Also check that the values matches the test input from conftest.py.
-    assert str(specs.config_map) == 'temp_deployment_config.json' == DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME
-    assert specs.map_name == 'prod' == DEPLOY_CONFIG_SAMPLE_1_FIELD_1
+    assert str(specs.config_map) == 'temp_config_map.json' == CONFIG_MAP_SAMPLE_1_FILE_NAME
+    assert specs.map_name == 'prod' == CONFIG_SAMPLE_1_FIELD_1
 
 
-def test__config_class_loading__deployment_field(json_deployment_config_file_path_4_5):
+def test__config_class_loading__map_field(json_config_map_file_path_4_5):
     """
     Checks if file specs properties are inserted correctly from a `ConfidentConfig` class declaration.
     Doesn't check the logic - this is done in `test_confident.py`.
@@ -65,7 +65,7 @@ def test__config_class_loading__deployment_field(json_deployment_config_file_pat
         port: str
 
         class Config:
-            config_map = 'temp_deployment_config.json'
+            config_map = 'temp_config_map.json'
             map_field = 'property_a'
 
     # Act
@@ -74,5 +74,5 @@ def test__config_class_loading__deployment_field(json_deployment_config_file_pat
     # Assert
     specs = config.specs()
     # Also check that the values matches the test input from conftest.py.
-    assert str(specs.config_map) == 'temp_deployment_config.json' == DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME
+    assert str(specs.config_map) == 'temp_config_map.json' == CONFIG_MAP_SAMPLE_1_FILE_NAME
     assert specs.map_field == 'property_a'

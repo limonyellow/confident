@@ -1,11 +1,12 @@
 import json
 import os
+from pathlib import Path
 from typing import Optional
 
 import pytest
 
 from confident import Confident
-from tests.conftest import validate_file_not_exists
+from tests.conftest import validate_file_not_exists, SPECS_FILE_1_SOURCE_PRIORITY
 
 
 def test__load_explicit_fields(create_config_class1, sample_1):
@@ -86,21 +87,6 @@ def test__load_fields_from_yaml_file(yaml_config_file_path_3, create_config_clas
     assert config.dict() == sample_3
 
 
-# def test__load_fields_from_env_file(env_config_file_path_1, create_config_class1, sample_1):
-#     # Arrange
-#     file_name = env_config_file_path_1
-#
-#     # Act
-#     config = create_config_class1(env_files=file_name)
-#
-#     # Assert
-#     assert config.dict() == sample_1
-#
-#     # Clean the env vars from the environment
-#     for field in sample_1.keys():
-#         del os.environ[field]
-
-
 def test__load_default_fields(create_config_class1_with_default_fields, sample_1):
     # Act
     config = create_config_class1_with_default_fields()
@@ -115,8 +101,10 @@ def test__load_fields_from_not_existing_file__ignore_missing_files_False(create_
     validate_file_not_exists(file_name=not_exists_file_name)
 
     # Act & Assert
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as error:
         create_config_class1(_files=not_exists_file_name, _ignore_missing_files=False)
+    assert 'is not exists.' in str(error.value)
+    assert not_exists_file_name in str(error.value)
 
 
 def test__load_fields_from_not_existing_file__ignore_missing_files_True(
@@ -133,9 +121,11 @@ def test__load_fields_from_not_existing_file__ignore_missing_files_True(
     assert config.dict() == sample_1
 
 
-# def test__load_specs_path(specs_file_path_1, create_config_class1, sample_1):
-#     # Act
-#     config = create_config_class1(_specs_path=specs_file_path_1)
-#
-#     # Assert
-#     assert config.dict() == sample_1
+def test__load_specs_path(specs_file_path_1, create_config_class1, sample_1):
+    # Act
+    config = create_config_class1(**sample_1, _specs_path=specs_file_path_1)
+
+    # Assert
+    assert config.source_priority() == config.specs().source_priority == SPECS_FILE_1_SOURCE_PRIORITY
+    assert config.specs().specs_path == Path(specs_file_path_1)
+    assert config.dict() == sample_1

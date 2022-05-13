@@ -4,6 +4,7 @@ from typing import Optional, Any, Dict, List, Union
 from pydantic import BaseModel
 
 from confident.config_source import ConfigSource
+from confident.map_field import MAP_FIELD_FLAG
 
 IGNORE_MISSING_FILES_DEFAULT = True
 DEFAULT_SOURCE_PRIORITY = [
@@ -38,7 +39,8 @@ class SettingsSpecs(BaseModel):
         model_config = model.Config.__dict__
 
         map_field = cls._find_map_field(
-            model=model, explicit_map_field=values.pop('_map_field', None) or model_config.get('map_field')
+            model=model,
+            explicit_map_field=values.pop('_map_field', None) or model_config.get('map_field')
         )
 
         files = values.pop('_files', None) or model_config.get('files')
@@ -81,13 +83,13 @@ class SettingsSpecs(BaseModel):
         """
         properties_marked_as_map_field = [
             name for name, model_field in model.__fields__.items() if
-            model_field.field_info.extra.get('map_field')
+            model_field.field_info.extra.get(MAP_FIELD_FLAG)
         ]
         if not properties_marked_as_map_field:
             return explicit_map_field
         if explicit_map_field and properties_marked_as_map_field:
             raise ValueError(
-                f'Cannot have both explicit `map_field` and also `MapField()` '
+                f'Cannot have both explicit `_map_field` and also `MapField()` '
                 f'in {model.__class__.__name__} declaration'
             )
         if len(properties_marked_as_map_field) > 1:
