@@ -3,7 +3,7 @@ import os
 from typing import Any, Dict, Type
 
 import yaml
-from confident import Confident
+from confident import Confident, ConfigSource
 from pydantic import create_model
 from pytest import fixture
 
@@ -19,8 +19,8 @@ SAMPLE_3_FILE_NAME = 'temp_conf3.yaml'
 SAMPLE_1_ENV_FILE_NAME = 'temp_conf1.env'
 # Spec files:
 SPECS_1_FILE_NAME = 'temp_specs1.json'
-# Deployment config files:
-DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME = 'temp_deployment_config.json'
+# Map config files:
+CONFIG_MAP_SAMPLE_1_FILE_NAME = 'temp_config_map.json'
 
 # Test field names:
 SAMPLE_1_FIELD_1 = 'title'
@@ -130,38 +130,43 @@ def env_config_file_path_1(sample_1) -> str:
     os.remove(file_name)
 
 
+SPECS_FILE_1_SOURCE_PRIORITY = [ConfigSource.init]
+
+
 @fixture
 def specs_file_path_1(sample_1) -> str:
-    yield from generate_temporary_file(file_name=SPECS_1_FILE_NAME, data={'explicit_fields': sample_1})
+    yield from generate_temporary_file(
+        file_name=SPECS_1_FILE_NAME, data={'source_priority': SPECS_FILE_1_SOURCE_PRIORITY}
+    )
 
 
-# Test deployment configs:
-DEPLOY_CONFIG_SAMPLE_1_FIELD_1 = 'prod'
-DEPLOY_CONFIG_SAMPLE_1_FIELD_2 = 'dev'
+# Test config maps:
+CONFIG_SAMPLE_1_FIELD_1 = 'prod'
+CONFIG_SAMPLE_1_FIELD_2 = 'dev'
 
-DEPLOY_FIELD_1 = 'environment'
+MAP_FIELD_1 = 'environment'
 
 
 @fixture
-def deployment_config_samples_4_5(sample_4, sample_5) -> Dict[str, Any]:
+def config_map_samples_4_5(sample_4, sample_5) -> Dict[str, Any]:
     return {
-        DEPLOY_CONFIG_SAMPLE_1_FIELD_1: sample_4,
-        DEPLOY_CONFIG_SAMPLE_1_FIELD_2: sample_5,
+        CONFIG_SAMPLE_1_FIELD_1: sample_4,
+        CONFIG_SAMPLE_1_FIELD_2: sample_5,
     }
 
 
 @fixture
-def sample_4_with_deployment_field(sample_4) -> Dict[str, Any]:
+def sample_4_with_map_field(sample_4) -> Dict[str, Any]:
     return {
-        DEPLOY_FIELD_1: DEPLOY_CONFIG_SAMPLE_1_FIELD_1,
+        MAP_FIELD_1: CONFIG_SAMPLE_1_FIELD_1,
         **sample_4
     }
 
 
 @fixture
-def json_deployment_config_file_path_4_5(deployment_config_samples_4_5) -> str:
+def json_config_map_file_path_4_5(config_map_samples_4_5) -> str:
     yield from generate_temporary_file(
-        file_name=DEPLOYMENT_CONFIG_SAMPLE_1_FILE_NAME, data=deployment_config_samples_4_5
+        file_name=CONFIG_MAP_SAMPLE_1_FILE_NAME, data=config_map_samples_4_5
     )
 
 
@@ -199,8 +204,8 @@ def create_config_class4(sample_4) -> Type[Confident]:
 
 
 @fixture
-def create_config_class4_with_deployment_field(sample_4_with_deployment_field) -> Type[Confident]:
+def create_config_class4_with_map_field(sample_4_with_map_field) -> Type[Confident]:
     return create_model(
         'ConfigClass4', __base__=Confident,
-        **{key: (type(value), ...) for key, value in sample_4_with_deployment_field.items()}
+        **{key: (type(value), ...) for key, value in sample_4_with_map_field.items()}
     )
