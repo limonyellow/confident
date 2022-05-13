@@ -33,5 +33,5 @@ jobs:
     - name: Build package
       run: poetry build
     - name: Publish package
-      run |
+      run: |
         poetry publish --username __token__ --password ${{ secrets.PYPI_API_TOKEN }}
