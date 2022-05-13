@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Union
 
 import yaml
-from dotenv import load_dotenv
 from pydantic import BaseSettings
 
 
@@ -29,17 +28,6 @@ def load_file(path: Union[Path, str]) -> Dict[str, Any]:
             return yaml.safe_load(file)
 
     raise ValueError(f'{path=} is not a supported file.')
-
-
-def load_env_files(paths: List[Union[Path, str]]) -> None:
-    """
-    Loads '.env' files in the format of '<name>=<value>' into the `os.environ` dictionary.
-
-    Args:
-        paths: List of file paths.
-    """
-    for path in paths:
-        load_dotenv(path)
 
 
 def get_class_file_path(cls: object) -> Union[str, Path]:
