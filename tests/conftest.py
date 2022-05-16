@@ -3,7 +3,7 @@ import os
 from typing import Any, Dict, Type
 
 import yaml
-from confident import Confident, ConfigSource
+from confident import BaseConfig, ConfigSource
 from pydantic import create_model
 from pytest import fixture
 
@@ -172,40 +172,40 @@ def json_config_map_file_path_4_5(config_map_samples_4_5) -> str:
 
 # Test input BaseModels:
 @fixture
-def create_config_class1(sample_1) -> Type[Confident]:
+def create_config_class1(sample_1) -> Type[BaseConfig]:
     return create_model(
-        'ConfigClass1', __base__=Confident,
+        'ConfigClass1', __base__=BaseConfig,
         **{key: (type(value), ...) for key, value in sample_1.items()}
     )
 
 
 @fixture
-def create_config_class1_with_default_fields(sample_1) -> Type[Confident]:
+def create_config_class1_with_default_fields(sample_1) -> Type[BaseConfig]:
     return create_model(
-        'ConfigClassWithDefaults1', __base__=Confident,
+        'ConfigClassWithDefaults1', __base__=BaseConfig,
         **{key: (type(value), value) for key, value in sample_1.items()}
     )
 
 
 @fixture
-def create_config_class3(sample_3) -> Type[Confident]:
+def create_config_class3(sample_3) -> Type[BaseConfig]:
     return create_model(
-        'ConfigClass3', __base__=Confident,
+        'ConfigClass3', __base__=BaseConfig,
         **{key: (type(value), ...) for key, value in sample_3.items()}
     )
 
 
 @fixture
-def create_config_class4(sample_4) -> Type[Confident]:
+def create_config_class4(sample_4) -> Type[BaseConfig]:
     return create_model(
-        'ConfigClass4', __base__=Confident,
+        'ConfigClass4', __base__=BaseConfig,
         **{key: (type(value), ...) for key, value in sample_4.items()}
     )
 
 
 @fixture
-def create_config_class4_with_map_field(sample_4_with_map_field) -> Type[Confident]:
+def create_config_class4_with_map_field(sample_4_with_map_field) -> Type[BaseConfig]:
     return create_model(
-        'ConfigClass4', __base__=Confident,
+        'ConfigClass4', __base__=BaseConfig,
         **{key: (type(value), ...) for key, value in sample_4_with_map_field.items()}
     )

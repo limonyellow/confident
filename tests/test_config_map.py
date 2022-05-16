@@ -1,6 +1,6 @@
 import pytest
 
-from confident import Confident, MapField
+from confident import BaseConfig, MapField
 from tests.conftest import CONFIG_SAMPLE_1_FIELD_1, MAP_FIELD_1, SAMPLE_4_FIELD_1
 
 
@@ -51,11 +51,11 @@ def test__load_config_map__2_map_fields_a():
     Test that map field is not explicit and declared by `MapField` at the same time.
     """
     # Arrange
-    class ConfigA(Confident):
+    class ConfigA(BaseConfig):
         env_a: str = 'nothing'
         env_b: str = MapField('nothing')
 
-    class ConfigB(Confident):
+    class ConfigB(BaseConfig):
         env_a: str = MapField('nothing')
 
     # Act & Assert
@@ -75,7 +75,7 @@ def test__load_config_map__2_map_fields_b():
     Test that map field is not declared by `MapField` and in `ConfidentConfig` class at the same time.
     """
     # Arrange
-    class Config(Confident):
+    class Config(BaseConfig):
         env_a: str = MapField('nothing')
 
         class ConfidentConfig:
@@ -92,7 +92,7 @@ def test__load_config_map__2_map_fields_c():
     Test that map field is not declared by `MapField` more than one.
     """
     # Arrange
-    class Config(Confident):
+    class Config(BaseConfig):
         env_a: str = MapField('nothing')
         env_b: str = MapField('nothing')
 
@@ -107,7 +107,7 @@ def test__load_config_map__map_field_and_deploy_name():
     Test that map field and map name are not used at the same time.
     """
     # Arrange
-    class Config(Confident):
+    class Config(BaseConfig):
         env_a: str = 'nothing'
 
     # Act & Assert
@@ -124,7 +124,7 @@ def test__load_config_map__no_config_map(map_field, map_name):
     Case 2 - Only `map_name` is provided.
     """
     # Arrange
-    class Config(Confident):
+    class Config(BaseConfig):
         env_a: str = 'nothing'
 
     # Act & Assert
@@ -150,7 +150,7 @@ def test__load_config_map__map_name_is_not_valid(map_name):
         }
     }
 
-    class Config(Confident):
+    class Config(BaseConfig):
         env_a: str = map_name
         title: str
 

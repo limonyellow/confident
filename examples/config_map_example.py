@@ -1,10 +1,10 @@
 import os
 from typing import List
 
-from confident import Confident, MapField
+from confident import BaseConfig, MapField
 
 
-class ServerConfig(Confident):
+class ServerConfig(BaseConfig):
     environment: str = MapField(default='local')
     host: str
     port: int
