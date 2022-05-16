@@ -9,14 +9,13 @@
 
 ---
 
-Confident helps you create configuration objects from multiple sources such as files and environment variables.  
-Confident config objects are data models that enforce validation and type hints by using [pydantic](https://pydantic-docs.helpmanual.io/) library.
+Confident helps you create configuration objects from multiple sources such as files, environment variables and maps.  
+Confident BaseConfig class is a data model that enforce validation and type hints by using [pydantic](https://pydantic-docs.helpmanual.io/) library.
 
-With Confident you can manage multiple configurations depend on the environment your code is deployed.
+With Confident you can manage multiple configurations depends on the environment your code is deployed.
 While having lots of flexibility how to describe your config objects, Confident will provide visibility of the process 
 and help you expose misconfiguration as soon as possible.
 
-For simple configuration loading from environment variables, you might want to check pydantic's [`BaseSettings`](https://pydantic-docs.helpmanual.io/usage/settings/) model.
 
 ## Example
 
@@ -37,7 +36,7 @@ class MyAppConfig(BaseConfig):
 os.environ['host'] = '127.0.0.1'
 os.environ['labels'] = '["FOO", "BAR"]'  # JSON strings can be used for more types.
 
-# Creating the config object. `Confident` will load the values of the properties.
+# Creating the config object. `BaseConfig` will load the values of the properties.
 config = MyAppConfig()
 
 print(config.host)
@@ -59,20 +58,23 @@ print(config.full_fields())
 ```pip install confident```
 
 ## Capabilities
-BaseConfig object can load config fields from multiple sources:
+### Customized Fields Loaders
+Built-in loaders:
 - Environment variables.
 - Config files such as 'json' and 'yaml'.
-- '.env' files.
-- Explicitly given fields.
-- Default values.
-- Deployment configs. (See documentation)
+- Config maps to load fields depends on the environment. (See documentation)
 
-Loading capabilities can be customized easily.
-Confident handles the loading and then provides ways to understand which value was loaded from what source.   
+It is possible to configure the loading priority and add your own loader classes.
 
-Confident object core functionality is based on [pydantic](https://pydantic-docs.helpmanual.io/) library. 
-That means BaseConfig object has all the benefits of pydantic's [`BaseModel`](https://pydantic-docs.helpmanual.io/usage/models/) including
-Type validation, [object transformation](https://pydantic-docs.helpmanual.io/usage/exporting_models/) and many more features.
+### Full Support of Pydantic BaseSettings
+Confident core functionality is based on [pydantic](https://pydantic-docs.helpmanual.io/) library. 
+That means BaseConfig object has all the benefits of pydantic's [`BaseModel`](https://pydantic-docs.helpmanual.io/usage/models/) 
+and [`BaseSettings`](https://pydantic-docs.helpmanual.io/usage/settings/)
+including type validation, [object transformation](https://pydantic-docs.helpmanual.io/usage/exporting_models/) and many more features.
+
+### Config Loading visibility
+BaseConfig object stores details about the fields loading process and offers ways to understand the source of each loaded field.
+Details about the origin value (before conversion), the location of the source and the type of loader, can all be accessed from the object. 
 
 ## Examples
 More examples can be found in the project's [repository](https://github.com/limonyellow/confident).
