@@ -49,9 +49,9 @@ Example
     #> port=5000 host='127.0.0.1' labels=['FOO', 'BAR']
     print(config.full_details())
     #> {
-    # 'port': ConfigProperty(name='port', value=5000, origin_value=5000, source_name='MyAppConfig', source_type='class_default', source_location=PosixPath('~/confident/readme_example.py')),
-    # 'host': ConfigProperty(name='host', value='127.0.0.1', origin_value='127.0.0.1', source_name='host', source_type='env_var', source_location='host'),
-    # 'labels': ConfigProperty(name='labels', value=['FOO', 'BAR'], origin_value='["FOO", "BAR"]', source_name='labels', source_type='env_var', source_location='labels')
+    # 'port': ConfigField(name='port', value=5000, origin_value=5000, source_name='MyAppConfig', source_type='class_default', source_location=PosixPath('~/confident/readme_example.py')),
+    # 'host': ConfigField(name='host', value='127.0.0.1', origin_value='127.0.0.1', source_name='host', source_type='env_var', source_location='host'),
+    # 'labels': ConfigField(name='labels', value=['FOO', 'BAR'], origin_value='["FOO", "BAR"]', source_name='labels', source_type='env_var', source_location='labels')
     # }
 
 Capabilities

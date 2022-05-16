@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic import BaseSettings
 
-from confident.config_property import ConfigProperty
+from confident.config_field import ConfigField
 from confident.config_source import ConfigSource
 from confident.loaders.source_loader_base import SourceLoader
 from confident.utils import load_file, convert_field_value
@@ -12,7 +12,7 @@ from confident.utils import load_file, convert_field_value
 class FileSourceLoader(SourceLoader):
     NAME = ConfigSource.file
 
-    def load_fields(self, settings: BaseSettings) -> List[ConfigProperty]:
+    def load_fields(self, settings: BaseSettings) -> List[ConfigField]:
         """
         Finds and loads requested config fields from files into a dictionary.
 
@@ -27,10 +27,10 @@ class FileSourceLoader(SourceLoader):
                 continue
             file_dict = load_file(path=file_path)
 
-            # Creates a dict with `ConfigProperty` from the file data and merges them with the rest of the properties
+            # Creates a dict with `ConfigField` from the file data and merges them with the rest of the properties
             # from other files.
             fields.update(
-                {key: ConfigProperty(
+                {key: ConfigField(
                     name=key,
                     value=convert_field_value(settings=settings, field_name=key, origin_value=value),
                     origin_value=value,

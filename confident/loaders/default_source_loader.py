@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseSettings
 
-from confident.config_property import ConfigProperty
+from confident.config_field import ConfigField
 from confident.config_source import ConfigSource
 from confident.loaders.source_loader_base import SourceLoader
 
@@ -10,7 +10,7 @@ from confident.loaders.source_loader_base import SourceLoader
 class DefaultSourceLoader(SourceLoader):
     NAME = ConfigSource.class_default
 
-    def load_fields(self, settings: BaseSettings) -> List[ConfigProperty]:
+    def load_fields(self, settings: BaseSettings) -> List[ConfigField]:
         """
         Loads default values declared in the inheriting class into a dictionary.
         """
@@ -21,7 +21,7 @@ class DefaultSourceLoader(SourceLoader):
                 continue
             # Uses `pydantic` ModelField to retrieve the default values of the model.
             default_value = model_field.get_default()
-            fields.append(ConfigProperty(
+            fields.append(ConfigField(
                 name=field_name,
                 value=default_value,
                 source_name=settings.__class__.__name__,

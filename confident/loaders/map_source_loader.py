@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic import BaseSettings
 
-from confident.config_property import ConfigProperty
+from confident.config_field import ConfigField
 from confident.config_source import ConfigSource
 from confident.loaders.source_loader_base import SourceLoader
 from confident.utils import load_file, convert_field_value
@@ -16,7 +16,7 @@ class MapSourceLoader(SourceLoader):
         super().__init__(**kwargs)
         self.all_loaded_fields = all_loaded_fields
 
-    def load_fields(self, settings: BaseSettings) -> List[ConfigProperty]:
+    def load_fields(self, settings: BaseSettings) -> List[ConfigField]:
         """
         Loads the relevant map config properties.
 
@@ -72,7 +72,7 @@ class MapSourceLoader(SourceLoader):
         if isinstance(selected_config, str):
             selected_config = load_file(selected_config)
 
-        # Creates the `ConfigProperty` dictionary.
+        # Creates the `ConfigField` dictionary.
         for name, value in selected_config.items():
             if name == map_field:
                 raise ValueError(
@@ -81,7 +81,7 @@ class MapSourceLoader(SourceLoader):
                     f"Remove '{map_field}' key or change the map field."
                 )
             config_fields.append(
-                ConfigProperty(
+                ConfigField(
                     name=name,
                     value=convert_field_value(settings=settings, field_name=name, origin_value=value),
                     origin_value=value,

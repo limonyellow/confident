@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from confident.config_source import ConfigSource
 
 
-class ConfigProperty(BaseModel):
+class ConfigField(BaseModel):
     """
     Holds details of a single configuration variable and its value.
     """
