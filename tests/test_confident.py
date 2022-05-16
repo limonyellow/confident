@@ -5,7 +5,7 @@ from typing import Optional
 
 import pytest
 
-from confident import Confident
+from confident import BaseConfig
 from tests.conftest import validate_file_not_exists, SPECS_FILE_1_SOURCE_PRIORITY
 
 
@@ -47,7 +47,7 @@ def test__load_string_json_env_fields():
     }
     os.environ.update({key: json.dumps(value) for key, value in fields.items()})
 
-    class Config(Confident):
+    class Config(BaseConfig):
         my_env_a: int
         my_env_b: bool
         my_env_c: Optional[dict]

@@ -21,7 +21,7 @@ SPECS_ATTR = '_specs'
 LOADER_MANAGER_ATTR = '_loader_manager'
 
 
-class Confident(BaseSettings):
+class BaseConfig(BaseSettings):
     __slots__ = (SPECS_ATTR, LOADER_MANAGER_ATTR)
 
     def __init__(self, **values: Any):
@@ -112,3 +112,7 @@ class Confident(BaseSettings):
         Returns: A dictionary with details of every field.
         """
         return deepcopy(self.__getattribute__(LOADER_MANAGER_ATTR).all_loaded_fields)
+
+
+class Confident(BaseConfig):
+    pass

@@ -3,7 +3,7 @@ from typing import List, Dict
 
 from pydantic import BaseModel
 
-from confident import Confident
+from confident import BaseConfig
 
 CONFIG_FILE_PATH = os.path.abspath(os.path.join(__file__, os.path.pardir, 'config.yaml'))
 USERS_FILE_PATH = os.path.abspath(os.path.join(__file__, os.path.pardir, 'users.yaml'))
@@ -15,7 +15,7 @@ class UserModel(BaseModel):
     email: str
 
 
-class AppConfig(Confident):
+class AppConfig(BaseConfig):
     title: str
     input_paths: List[str]
     timeout: int = 60
@@ -35,6 +35,7 @@ def main():
 
     config_b = AppConfig(_files=CONFIG_FILE_PATH)
     print(f'{config_b=}')
+    print(f'{config_b.all_loaded_fields()=}')
 
 
 if __name__ == '__main__':

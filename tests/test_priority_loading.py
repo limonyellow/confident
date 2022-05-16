@@ -5,7 +5,7 @@ import pytest
 from _pytest.fixtures import fixture
 from pydantic import create_model
 
-from confident import Confident
+from confident import BaseConfig
 from confident.config_source import ConfigSource
 from tests.conftest import generate_temporary_file
 
@@ -83,7 +83,7 @@ def json_config_file_path() -> str:
 )
 def test__priority_loading(source_priority, expected_fields, json_config_file_path):
     config_class = create_model(
-        'ConfigClass1', __base__=Confident,
+        'ConfigClass1', __base__=BaseConfig,
         **{key: (type(value), value) for key, value in DEFAULT_VALUES_A.items()}
     )
     config = config_class(

@@ -1,4 +1,4 @@
-from confident import Confident
+from confident import BaseConfig
 from confident.config_source import ConfigSource
 from tests.conftest import CONFIG_MAP_SAMPLE_1_FILE_NAME, CONFIG_SAMPLE_1_FIELD_1
 
@@ -9,7 +9,7 @@ def test__config_class_loading__files():
     Doesn't check the logic - this is done in `test_confident.py`.
     """
     # Arrange:
-    class MyConfig(Confident):
+    class MyConfig(BaseConfig):
         property_a: str = 'nothing'
 
         class Config:
@@ -34,7 +34,7 @@ def test__config_class_loading__map_name(json_config_map_file_path_4_5):
     Doesn't check the logic - this is done in `test_confident.py`.
     """
     # Arrange:
-    class MyConfig(Confident):
+    class MyConfig(BaseConfig):
         property_a: str = 'nothing'
         host: str
         port: str
@@ -59,7 +59,7 @@ def test__config_class_loading__map_field(json_config_map_file_path_4_5):
     Doesn't check the logic - this is done in `test_confident.py`.
     """
     # Arrange:
-    class MyConfig(Confident):
+    class MyConfig(BaseConfig):
         property_a: str = 'prod'
         host: str
         port: str
