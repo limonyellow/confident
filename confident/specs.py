@@ -12,7 +12,7 @@ DEFAULT_SOURCE_PRIORITY = [
 ]
 
 
-class SettingsSpecs(BaseModel):
+class ConfigSpecs(BaseModel):
     """
     A model that holds all the metadata regarding the Confident config object.
     """
