@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "confident"
-version = "0.2.3"
+version = "0.2.4"
 description = "Loading configurations from multiple sources into a data model."
 authors = ["limonyellow"]
 license = "MIT"
