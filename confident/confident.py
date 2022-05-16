@@ -6,7 +6,7 @@ from typing import Tuple, Any, Dict, List
 from pydantic import BaseSettings
 from pydantic.env_settings import SettingsSourceCallable
 
-from confident.config_property import ConfigProperty
+from confident.config_field import ConfigField
 from confident.config_source import ConfigSource
 from confident.loader_manager import LoaderManager
 from confident.loaders.default_source_loader import DefaultSourceLoader
@@ -107,7 +107,7 @@ class BaseConfig(BaseSettings):
         """
         return deepcopy(self.__getattribute__(LOADER_MANAGER_ATTR).full_fields)
 
-    def all_loaded_fields(self) -> Dict[str, List[ConfigProperty]]:
+    def all_loaded_fields(self) -> Dict[str, List[ConfigField]]:
         """
         Returns: A dictionary with details of every field.
         """

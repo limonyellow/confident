@@ -4,7 +4,7 @@ from typing import List
 from pydantic import BaseSettings
 
 from confident.specs import SettingsSpecs
-from confident.config_property import ConfigProperty
+from confident.config_field import ConfigField
 
 
 class SourceLoader(ABC):
@@ -14,5 +14,5 @@ class SourceLoader(ABC):
         self.specs = specs or SettingsSpecs()
 
     @abstractmethod
-    def load_fields(self, settings: BaseSettings) -> List[ConfigProperty]:
+    def load_fields(self, settings: BaseSettings) -> List[ConfigField]:
         ...

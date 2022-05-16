@@ -30,9 +30,9 @@ Notice the difference between the source types:
 
     print(config.full_details())
     #> {
-    # 'title': ConfigProperty(name='title', value='my_application', origin_value='my_application', source_name='AppConfig', source_type='class_default', source_location=WindowsPath('example.py')),
-    # 'timeout': ConfigProperty(name='timeout', value=60, origin_value=60, source_name='config.yaml', source_type='file', source_location=WindowsPath('config.yaml')),
-    # 'input_paths': ConfigProperty(name='input_paths', value=['/tmp/input_a', '/tmp/input_b'], origin_value='["/tmp/input_a", "/tmp/input_b"]', source_name='input_paths', source_type='env_var', source_location='input_paths'),
+    # 'title': ConfigField(name='title', value='my_application', origin_value='my_application', source_name='AppConfig', source_type='class_default', source_location=WindowsPath('example.py')),
+    # 'timeout': ConfigField(name='timeout', value=60, origin_value=60, source_name='config.yaml', source_type='file', source_location=WindowsPath('config.yaml')),
+    # 'input_paths': ConfigField(name='input_paths', value=['/tmp/input_a', '/tmp/input_b'], origin_value='["/tmp/input_a", "/tmp/input_b"]', source_name='input_paths', source_type='env_var', source_location='input_paths'),
     # }
 
 
