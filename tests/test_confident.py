@@ -126,6 +126,7 @@ def test__load_specs_path(specs_file_path_1, create_config_class1, sample_1):
     config = create_config_class1(**sample_1, _specs_path=specs_file_path_1)
 
     # Assert
+    assert config.specs() == config.__specs__ == config._specs
     assert config.source_priority() == config.specs().source_priority == SPECS_FILE_1_SOURCE_PRIORITY
     assert config.specs().specs_path == Path(specs_file_path_1)
     assert config.dict() == sample_1

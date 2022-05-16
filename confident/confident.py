@@ -14,7 +14,7 @@ from confident.loaders.env_source_loader import EnvSourceLoader
 from confident.loaders.file_source_loader import FileSourceLoader
 from confident.loaders.init_source_loader import InitSourceLoader
 from confident.loaders.map_source_loader import MapSourceLoader
-from confident.specs import SettingsSpecs
+from confident.specs import ConfigSpecs
 from confident.utils import get_class_file_path
 
 SPECS_ATTR = '_specs'
@@ -34,11 +34,11 @@ class BaseConfig(BaseSettings):
         if not specs:
             specs_path = values.pop('_specs_path', None) or self.Config.__dict__.get('specs_path')
             if specs_path:
-                specs = SettingsSpecs.from_path(
+                specs = ConfigSpecs.from_path(
                     path=specs_path, class_path=subclass_location, creation_path=caller_location
                 )
             else:
-                specs = SettingsSpecs.from_model(
+                specs = ConfigSpecs.from_model(
                     model=self, values=values, class_path=subclass_location, creation_path=caller_location
                 )
 
@@ -89,29 +89,45 @@ class BaseConfig(BaseSettings):
 
             return loader_manager.load_all()
 
-    def specs(self) -> SettingsSpecs:
+    @property
+    def __specs__(self) -> ConfigSpecs:
         """
-        Returns: A deep copy of the settings class specs.
+        Returns: The model specs.
         """
-        return deepcopy(self.__getattribute__(SPECS_ATTR))
+        return self.__getattribute__(SPECS_ATTR)
 
-    def source_priority(self) -> List[ConfigSource]:
+    def specs(self):
+        return deepcopy(self.__specs__)
+
+    @property
+    def __source_priority__(self) -> List[ConfigSource]:
         """
         Returns: List of sources from the highest priority to the lowest.
         """
-        return deepcopy(self.__getattribute__(SPECS_ATTR).source_priority)
+        return self.__specs__.source_priority
 
-    def full_fields(self) -> Dict[str, Any]:
+    def source_priority(self):
+        return deepcopy(self.__source_priority__)
+
+    @property
+    def __full_fields__(self) -> Dict[str, Any]:
         """
         Returns: A dictionary with details of every field.
         """
-        return deepcopy(self.__getattribute__(LOADER_MANAGER_ATTR).full_fields)
+        return self.__getattribute__(LOADER_MANAGER_ATTR).full_fields
 
-    def all_loaded_fields(self) -> Dict[str, List[ConfigField]]:
+    def full_fields(self):
+        return deepcopy(self.__full_fields__)
+
+    @property
+    def __all_loaded_fields__(self) -> Dict[str, List[ConfigField]]:
         """
-        Returns: A dictionary with details of every field.
+        Returns: A dictionary with all the fields that were loaded before the prioritization classified by sources.
         """
-        return deepcopy(self.__getattribute__(LOADER_MANAGER_ATTR).all_loaded_fields)
+        return self.__getattribute__(LOADER_MANAGER_ATTR).all_loaded_fields
+
+    def all_loaded_fields(self):
+        return deepcopy(self.all_loaded_fields)
 
 
 class Confident(BaseConfig):

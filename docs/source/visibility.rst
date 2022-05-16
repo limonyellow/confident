@@ -42,7 +42,7 @@ The position of the the `Confident` object declaration:
 
 .. code-block:: python
 
-    config.specs().class_path
+    config.__specs__.class_path
     #> PosixPath('~/MyProject/project_config.py')
 
 
@@ -50,5 +50,5 @@ The position of the the `Confident` object instance creation:
 
 .. code-block:: python
 
-    config.specs().creation_path
+    config.__specs__.creation_path
     #> PosixPath('~/MyProject/main.py')
