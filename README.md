@@ -5,7 +5,7 @@
 [![GitHub](https://img.shields.io/github/license/limonyellow/confident?style=plastic)](https://github.com/limonyellow/confident)
 ---
 
-**Documentation**: [https://confident.readthedocs.io/en/latest/](https://confident.readthedocs.io/en/latest/)
+[**Documentation**](https://limonyellow.github.io/confident/)
 
 ---
 
@@ -55,25 +55,27 @@ print(config.full_fields())
 ```
 
 ## Installation
-```pip install confident```
+```shell
+(.venv) $ pip install confident
+```
 
 ## Capabilities
 ### Customized Fields Loaders
-Built-in loaders:
-- Environment variables.
-- Config files such as 'json' and 'yaml'.
-- Config maps to load fields depends on the environment. (See documentation)
+Built-in loaders:  
+- Environment variables.  
+- Config files such as 'json' and 'yaml'.  
+- Config maps to load fields depends on the environment. (See documentation)  
 
 It is possible to configure the loading priority and add your own loader classes.
 
 ### Full Support of Pydantic BaseSettings
 Confident core functionality is based on [pydantic](https://pydantic-docs.helpmanual.io/) library. 
-That means BaseConfig object has all the benefits of pydantic's [`BaseModel`](https://pydantic-docs.helpmanual.io/usage/models/) 
+That means `BaseConfig` object has all the benefits of pydantic's [`BaseModel`](https://pydantic-docs.helpmanual.io/usage/models/) 
 and [`BaseSettings`](https://pydantic-docs.helpmanual.io/usage/settings/)
 including type validation, [object transformation](https://pydantic-docs.helpmanual.io/usage/exporting_models/) and many more features.
 
 ### Config Loading visibility
-BaseConfig object stores details about the fields loading process and offers ways to understand the source of each loaded field.
+`BaseConfig` object stores details about the fields loading process and offers ways to understand the source of each loaded field.
 Details about the origin value (before conversion), the location of the source and the type of loader, can all be accessed from the object. 
 
 ## Examples

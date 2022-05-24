@@ -2,3 +2,5 @@ site_name: Confident
 theme:
   name: material
   custom_dir: docs/theme
+
+  logo: 'logo.svg'
