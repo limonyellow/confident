@@ -67,7 +67,7 @@ class MapSourceLoader(SourceLoader):
             selected_config = config_map.get(map_name)
 
         if selected_config is None:
-            raise KeyError(f'No matching map config to {map_name=}. Check your `config_map`')
+            raise KeyError(f'No matching map config to {map_name=}. Check your `config_map`.')
 
         if isinstance(selected_config, str):
             selected_config = load_file(selected_config)
