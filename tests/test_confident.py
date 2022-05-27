@@ -2,10 +2,12 @@ import json
 import os
 from pathlib import Path
 from typing import Optional
+from unittest.mock import patch, Mock, PropertyMock
 
 import pytest
 
 from confident import BaseConfig
+from confident.utils import get_class_file_path
 from tests.conftest import validate_file_not_exists, SPECS_FILE_1_SOURCE_PRIORITY
 
 
@@ -76,15 +78,15 @@ def test__load_fields_from_json_file(json_config_file_path_1, create_config_clas
     assert config.dict() == sample_1
 
 
-def test__load_fields_from_yaml_file(yaml_config_file_path_3, create_config_class3, sample_3):
+def test__load_fields_from_yaml_file(yaml_config_file_path_2, create_config_class3, sample_2):
     # Arrange
-    file_name = yaml_config_file_path_3
+    file_name = yaml_config_file_path_2
 
     # Act
     config = create_config_class3(_files=file_name)
 
     # Assert
-    assert config.dict() == sample_3
+    assert config.dict() == sample_2
 
 
 def test__load_default_fields(create_config_class1_with_default_fields, sample_1):
@@ -121,6 +123,14 @@ def test__load_fields_from_not_existing_file__ignore_missing_files_True(
     assert config.dict() == sample_1
 
 
+def test__try_load_file_with_unsupported_suffix(no_suffix_config_file_path_4, create_config_class1):
+    # Act & Assert
+    with pytest.raises(ValueError) as error:
+        create_config_class1(_files=no_suffix_config_file_path_4)
+    assert 'is not a supported file.' in str(error.value)
+    assert no_suffix_config_file_path_4 in str(error.value)
+
+
 def test__load_specs_path(specs_file_path_1, create_config_class1, sample_1):
     # Act
     config = create_config_class1(**sample_1, _specs_path=specs_file_path_1)
@@ -130,3 +140,14 @@ def test__load_specs_path(specs_file_path_1, create_config_class1, sample_1):
     assert config.source_priority() == config.specs().source_priority == SPECS_FILE_1_SOURCE_PRIORITY
     assert config.specs().specs_path == Path(specs_file_path_1)
     assert config.dict() == sample_1
+
+
+@patch('importlib.import_module')
+@pytest.mark.parametrize('exception', [ImportError, AttributeError])
+def test__get_class_file_path__no_module_file(import_module_patch, exception):
+    # Arrange
+    type(import_module_patch.return_value).__file__ = PropertyMock(side_effect=exception())
+    # Act
+    cls_path = get_class_file_path(Mock())
+    # Assert
+    assert cls_path == Path.cwd()

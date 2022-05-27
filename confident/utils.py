@@ -34,14 +34,12 @@ def get_class_file_path(cls: object) -> Union[str, Path]:
     """
     Gets the path that the config class is initiated from.
     Tries to find the path of the caller module.
-    If the module can't be imported returns the module name.
     If there is no module that called this class constructor, returns the current working path.
+    Mainly happens when running on terminal.
     """
     try:
         return importlib.import_module(cls.__module__).__file__
-    except ImportError:
-        return cls.__module__
-    except AttributeError:
+    except (AttributeError, ImportError):
         return Path.cwd()
 
 
