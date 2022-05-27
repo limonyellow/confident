@@ -146,7 +146,7 @@ def test__load_config_map__no_config_map(map_field, map_name):
 @pytest.mark.parametrize('map_name', [True, 7])
 def test__load_config_map__map_name_is_not_valid(map_name):
     """
-    Test that deployment name is a string.
+    Test that map name is a string.
     Case 1 - The `map_name` is type `bool`.
     Case 2 - The `map_name` is type `int`.
     """
@@ -168,6 +168,20 @@ def test__load_config_map__map_name_is_not_valid(map_name):
     with pytest.raises(ValueError) as error:
         Config(_map_field='env_a', _config_map=config_map)
     assert f''''env_a' is not valid. Value has to be <str> not "{map_name}" type={type(map_name)}''' in str(error.value)
+
+
+def test__load_config_map__map_name_is_not_found():
+    """
+    Test if map name is not found - an indicative error will be raised.
+    """
+    # Arrange
+    class Config(BaseConfig):
+        env: str = MapField('prod')
+
+    # Act & Assert
+    with pytest.raises(KeyError) as error:
+        Config(_config_map={'dev': {}})
+    assert f"No matching map config to map_name='prod'. Check your `config_map`." in str(error.value)
 
 
 def test__load_config_map__map_field_also_inside_config_map(

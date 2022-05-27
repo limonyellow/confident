@@ -36,7 +36,6 @@ def main():
     config_b = AppConfig(_files=CONFIG_FILE_PATH)
     print(f'{config_b=}')
     print(f'{config_b.all_loaded_fields()=}')
-
-
-if __name__ == '__main__':
-    main()
+    print(f'{config_b.__all_loaded_fields__=}')
+    print(f'{config_b.full_fields()=}')
+    print(f'{config_b.__full_fields__=}')
