@@ -13,8 +13,7 @@ os.environ = {}
 # Test files names:
 # Config files:
 SAMPLE_1_FILE_NAME = 'temp_conf1.json'
-SAMPLE_2_FILE_NAME = 'temp_conf2.json'
-SAMPLE_3_FILE_NAME = 'temp_conf3.yaml'
+SAMPLE_2_FILE_NAME = 'temp_conf2.yaml'
 # Env files:
 SAMPLE_1_ENV_FILE_NAME = 'temp_conf1.env'
 # Spec files:
@@ -70,15 +69,6 @@ def sample_1():
 @fixture
 def sample_2():
     return {
-        SAMPLE_2_FIELD_1: 'db_sample_2',
-        SAMPLE_2_FIELD_2: '127.0.0.1',
-        SAMPLE_2_FIELD_3: 5002,
-    }
-
-
-@fixture
-def sample_3():
-    return {
         SAMPLE_3_FIELD_1: 'lemonade',
         SAMPLE_3_FIELD_2: '6',
     }
@@ -107,13 +97,13 @@ def json_config_file_path_1(sample_1) -> str:
 
 
 @fixture
-def json_config_file_path_2(sample_2) -> str:
-    yield from generate_temporary_file(data=sample_2, file_name=SAMPLE_2_FILE_NAME)
+def yaml_config_file_path_2(sample_2) -> str:
+    yield from generate_temporary_file(file_name=SAMPLE_2_FILE_NAME, data=sample_2, file_format='yaml')
 
 
 @fixture
-def yaml_config_file_path_3(sample_3) -> str:
-    yield from generate_temporary_file(file_name=SAMPLE_3_FILE_NAME, data=sample_3, file_format='yaml')
+def no_suffix_config_file_path_4(sample_1) -> str:
+    yield from generate_temporary_file(data=sample_1, file_name='no_suffix_file')
 
 
 @fixture
@@ -188,10 +178,10 @@ def create_config_class1_with_default_fields(sample_1) -> Type[BaseConfig]:
 
 
 @fixture
-def create_config_class3(sample_3) -> Type[BaseConfig]:
+def create_config_class3(sample_2) -> Type[BaseConfig]:
     return create_model(
         'ConfigClass3', __base__=BaseConfig,
-        **{key: (type(value), ...) for key, value in sample_3.items()}
+        **{key: (type(value), ...) for key, value in sample_2.items()}
     )
 
 
