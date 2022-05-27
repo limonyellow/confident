@@ -76,3 +76,7 @@ def test__config_class_loading__map_field(json_config_map_file_path_4_5):
     # Also check that the values matches the test input from conftest.py.
     assert str(specs.config_map) == 'temp_config_map.json' == CONFIG_MAP_SAMPLE_1_FILE_NAME
     assert specs.map_field == 'property_a'
+
+
+def test__config_source_string_representation():
+    assert ConfigSource.init.__repr__() == "'" + str(ConfigSource.init) + "'"

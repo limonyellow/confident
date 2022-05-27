@@ -1,6 +1,7 @@
 import pytest
 
 from confident import BaseConfig, MapField
+from confident.map_field import MAP_FIELD_FLAG
 from tests.conftest import CONFIG_SAMPLE_1_FIELD_1, MAP_FIELD_1, SAMPLE_4_FIELD_1
 
 
@@ -100,6 +101,15 @@ def test__load_config_map__2_map_fields_c():
     with pytest.raises(ValueError) as error:
         Config(_config_map={})
     assert 'Cannot have more then one `MapField()` in Config declaration' in str(error.value)
+
+
+def test__use_map_field_flag_inside_MapField():
+    """
+    Test that the MAP_FIELD_FLAG isn't used ambiguously.
+    """
+    with pytest.raises(ValueError) as error:
+        MapField('nothing', **{MAP_FIELD_FLAG: 'nothing2'})
+    assert f'Cannot use "{MAP_FIELD_FLAG}" key inside `MapField()`.' in str(error.value)
 
 
 def test__load_config_map__map_field_and_deploy_name():
