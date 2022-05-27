@@ -151,3 +151,17 @@ def test__get_class_file_path__no_module_file(import_module_patch, exception):
     cls_path = get_class_file_path(Mock())
     # Assert
     assert cls_path == Path.cwd()
+
+
+def test__validate_file_not_exists(json_config_file_path_1):
+    """
+    Test that the tool to check the file is not exists before the test starts is working properly.
+    """
+    # Arrange
+    exists_path = json_config_file_path_1
+
+    # Act & Assert
+    with pytest.raises(FileExistsError) as error:
+        validate_file_not_exists(exists_path)
+    assert f'File {exists_path} should not exists while tests run.' in str(error.value)
+

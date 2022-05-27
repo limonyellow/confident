@@ -106,20 +106,6 @@ def no_suffix_config_file_path_4(sample_1) -> str:
     yield from generate_temporary_file(data=sample_1, file_name='no_suffix_file')
 
 
-@fixture
-def env_config_file_path_1(sample_1) -> str:
-    data = sample_1
-    file_name = SAMPLE_1_ENV_FILE_NAME
-    validate_file_not_exists(file_name=file_name)
-
-    with open(file_name, 'w') as file:
-        file.writelines([f'{key}={value}\n' for key, value in data.items()])
-
-    yield file_name
-
-    os.remove(file_name)
-
-
 SPECS_FILE_1_SOURCE_PRIORITY = [ConfigSource.init]
 
 
