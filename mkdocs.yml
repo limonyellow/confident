@@ -4,3 +4,4 @@ theme:
   custom_dir: docs/theme
 
   logo: 'logo.svg'
+  favicon: 'logo.svg'
