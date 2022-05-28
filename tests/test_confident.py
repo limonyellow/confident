@@ -138,7 +138,7 @@ def test__loader_base_has_to_be_implemented():
     with pytest.raises(TypeError) as error:
         loader = MyLoader()
         loader.load_fields(Mock())
-    assert "Can't instantiate abstract class MyLoader with abstract method load_fields" in str(error.value)
+    assert "Can't instantiate abstract class MyLoader" in str(error.value)
 
 
 def test__load_specs_path(specs_file_path_1, create_config_class1, sample_1):
