@@ -2,8 +2,8 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/confident?style=plastic)](https://github.com/limonyellow/confident)
 [![PyPI](https://img.shields.io/pypi/v/confident?style=plastic&color=%2334D058)](https://pypi.org/project/confident/)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/limonyellow/confident/Python%20package/main?style=plastic)](https://github.com/limonyellow/confident/actions)
-[![Coverage](https://codecov.io/gh/limonyellow/confident/branch/main/graph/badge.svg?token=L161UYE2RM)](https://codecov.io/gh/limonyellow/confident)
 [![GitHub](https://img.shields.io/github/license/limonyellow/confident?style=plastic)](https://github.com/limonyellow/confident)
+[![Coverage](https://codecov.io/gh/limonyellow/confident/branch/main/graph/badge.svg?token=L161UYE2RM)](https://codecov.io/gh/limonyellow/confident)
 ---
 
 [**Documentation**](https://limonyellow.github.io/confident/)
