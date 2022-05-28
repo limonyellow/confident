@@ -1,4 +1,5 @@
 import pytest
+from pydantic import create_model
 
 from confident import BaseConfig, MapField
 from confident.map_field import MAP_FIELD_FLAG
@@ -45,6 +46,27 @@ def test__load_config_map_dict__map_field(create_config_class4, config_map_sampl
 
     # Assert
     assert config.dict() == sample_4
+
+
+def test__load_config_map__map_name_points_to_file(json_config_file_path_1, sample_1):
+    """
+    Test that the value of the map name can be a path to 'object' (json/yaml).
+    """
+    # Arrange
+    map_name = 'prod'
+    config_map = {
+        map_name: json_config_file_path_1
+    }
+    config_cls = create_model(
+        'ConfigClass', __base__=BaseConfig,
+        **{key: (type(value), ...) for key, value in sample_1.items()},
+    )
+
+    # Act
+    config = config_cls(_config_map=config_map, _map_name=map_name)
+
+    # Assert
+    assert config.dict() == sample_1
 
 
 def test__load_config_map__2_map_fields_a():

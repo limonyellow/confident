@@ -69,7 +69,7 @@ class MapSourceLoader(SourceLoader):
         if selected_config is None:
             raise KeyError(f'No matching map config to {map_name=}. Check your `config_map`.')
 
-        if isinstance(selected_config, str):
+        if isinstance(selected_config, str) or isinstance(selected_config, Path):
             selected_config = load_file(selected_config)
 
         # Creates the `ConfigField` dictionary.

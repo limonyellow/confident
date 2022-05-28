@@ -29,8 +29,3 @@ def main():
     # Will load deployment='dev'
     config_c = ServerConfig(environment='dev')
     print(f'{config_c=}')
-
-
-if __name__ == '__main__':
-    main()
-

@@ -7,6 +7,7 @@ from unittest.mock import patch, Mock, PropertyMock
 import pytest
 
 from confident import BaseConfig
+from confident.loaders.source_loader_base import SourceLoader
 from confident.utils import get_class_file_path
 from tests.conftest import validate_file_not_exists, SPECS_FILE_1_SOURCE_PRIORITY
 
@@ -129,6 +130,15 @@ def test__try_load_file_with_unsupported_suffix(no_suffix_config_file_path_4, cr
         create_config_class1(_files=no_suffix_config_file_path_4)
     assert 'is not a supported file.' in str(error.value)
     assert no_suffix_config_file_path_4 in str(error.value)
+
+
+def test__loader_base_has_to_be_implemented():
+    class MyLoader(SourceLoader):
+        pass
+    with pytest.raises(TypeError) as error:
+        loader = MyLoader()
+        loader.load_fields(Mock())
+    assert "Can't instantiate abstract class MyLoader" in str(error.value)
 
 
 def test__load_specs_path(specs_file_path_1, create_config_class1, sample_1):
