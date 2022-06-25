@@ -6,7 +6,7 @@ from unittest.mock import patch, Mock, PropertyMock
 
 import pytest
 
-from confident import BaseConfig
+from confident import BaseConfig, ConfigSource
 from confident.loaders.source_loader_base import SourceLoader
 from confident.utils import get_class_file_path
 from tests.conftest import validate_file_not_exists, SPECS_FILE_1_SOURCE_PRIORITY
@@ -50,7 +50,7 @@ def test__load_string_json_env_fields():
     }
     os.environ.update({key: json.dumps(value) for key, value in fields.items()})
 
-    class Config(BaseConfig):
+    class MyConfig(BaseConfig):
         my_env_a: int
         my_env_b: bool
         my_env_c: Optional[dict]
@@ -58,7 +58,7 @@ def test__load_string_json_env_fields():
         my_env_e: dict
 
     # Act
-    config = Config()
+    config = MyConfig()
 
     # Assert
     assert config.dict() == fields
@@ -88,6 +88,31 @@ def test__load_fields_from_yaml_file(yaml_config_file_path_2, create_config_clas
 
     # Assert
     assert config.dict() == sample_2
+
+
+def test__load_fields_from_json_file__not_dict_content(json_config_file_path_3, create_config_class1):
+    # Arrange
+    file_name = json_config_file_path_3
+
+    # Act
+    with pytest.raises(ValueError) as error:
+        create_config_class1(_files=file_name)
+
+    # Assert
+    assert 'has to have a valid dict content.' in str(error.value)
+
+
+def test__load_fields_from_yaml_file__empty_content(empty_config_file_path_4):
+    # Arrange
+    file_name = empty_config_file_path_4
+
+    # Act
+    class MyConfig(BaseConfig):
+        name: str = 'my_name'
+    config = MyConfig(_files=file_name)
+
+    # Assert
+    assert config.all_loaded_fields().get(ConfigSource.file) == {}
 
 
 def test__load_default_fields(create_config_class1_with_default_fields, sample_1):
@@ -124,12 +149,12 @@ def test__load_fields_from_not_existing_file__ignore_missing_files_True(
     assert config.dict() == sample_1
 
 
-def test__try_load_file_with_unsupported_suffix(no_suffix_config_file_path_4, create_config_class1):
+def test__try_load_file_with_unsupported_suffix(no_suffix_config_file_path_5, create_config_class1):
     # Act & Assert
     with pytest.raises(ValueError) as error:
-        create_config_class1(_files=no_suffix_config_file_path_4)
+        create_config_class1(_files=no_suffix_config_file_path_5)
     assert 'is not a supported file.' in str(error.value)
-    assert no_suffix_config_file_path_4 in str(error.value)
+    assert no_suffix_config_file_path_5 in str(error.value)
 
 
 def test__loader_base_has_to_be_implemented():

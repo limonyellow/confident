@@ -14,6 +14,8 @@ os.environ = {}
 # Config files:
 SAMPLE_1_FILE_NAME = 'temp_conf1.json'
 SAMPLE_2_FILE_NAME = 'temp_conf2.yaml'
+SAMPLE_3_FILE_NAME = 'temp_conf3.json'
+SAMPLE_4_FILE_NAME = 'temp_conf4.yaml'
 # Env files:
 SAMPLE_1_ENV_FILE_NAME = 'temp_conf1.env'
 # Spec files:
@@ -42,12 +44,14 @@ def validate_file_not_exists(file_name: str) -> None:
         raise FileExistsError(f'File {file_name} should not exists while tests run.')
 
 
-def generate_temporary_file(file_name: str, data: dict, file_format: str = 'json') -> str:
+def generate_temporary_file(file_name: str, data: Any, file_format: str = 'json') -> str:
     validate_file_not_exists(file_name=file_name)
 
     with open(file_name, 'w') as file:
         if file_format == 'yaml':
             yaml.safe_dump(data, file)
+        elif file_format == 'text':
+            file.write(data)
         else:
             json.dump(data, file)
 
@@ -102,7 +106,17 @@ def yaml_config_file_path_2(sample_2) -> str:
 
 
 @fixture
-def no_suffix_config_file_path_4(sample_1) -> str:
+def json_config_file_path_3() -> str:
+    yield from generate_temporary_file(data='some_string', file_name=SAMPLE_3_FILE_NAME)
+
+
+@fixture
+def empty_config_file_path_4() -> str:
+    yield from generate_temporary_file(file_name=SAMPLE_4_FILE_NAME, data='', file_format='text')
+
+
+@fixture
+def no_suffix_config_file_path_5(sample_1) -> str:
     yield from generate_temporary_file(data=sample_1, file_name='no_suffix_file')
 
 

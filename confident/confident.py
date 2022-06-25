@@ -127,7 +127,7 @@ class BaseConfig(BaseSettings):
         return self.__getattribute__(LOADER_MANAGER_ATTR).all_loaded_fields
 
     def all_loaded_fields(self):
-        return deepcopy(self.all_loaded_fields)
+        return deepcopy(self.__all_loaded_fields__)
 
 
 class Confident(BaseConfig):
