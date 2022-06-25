@@ -1,7 +1,7 @@
 import importlib
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Union
 
 import yaml
 from pydantic import BaseSettings
@@ -13,6 +13,11 @@ def load_file(path: Union[Path, str]) -> Dict[str, Any]:
 
     Args:
         path: Path to the file to load.
+
+    Raises:
+        ValueError - If the file is not exists.
+        ValueError - If the file format is not supported.
+        ValueError - If the loaded data is not a dict.
     """
     path = Path(path)
 
@@ -21,13 +26,22 @@ def load_file(path: Union[Path, str]) -> Dict[str, Any]:
 
     if path.suffix == '.json':
         with open(path, mode='r') as file:
-            return json.load(file)
+            loaded = json.load(file)
 
-    if path.suffix == '.yaml':
+    elif path.suffix == '.yaml':
         with open(path, mode='r') as file:
-            return yaml.safe_load(file)
+            loaded = yaml.safe_load(file)
 
-    raise ValueError(f'{path=} is not a supported file.')
+    else:
+        raise ValueError(f'{path=} is not a supported file.')
+
+    # Check the loaded data
+    if loaded is None:
+        loaded = {}
+    if not isinstance(loaded, dict):
+        raise ValueError(f'{path=} has to have a valid dict content.')
+
+    return loaded
 
 
 def get_class_file_path(cls: object) -> Union[str, Path]:
