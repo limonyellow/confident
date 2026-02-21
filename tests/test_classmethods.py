@@ -112,6 +112,17 @@ class TestFromSpecs:
         assert config.source_priority() == SPECS_FILE_1_SOURCE_PRIORITY
         assert config.specs().specs_path == Path(specs_file_path_1)
 
+    def test__from_specs__with_source_priority(
+        self, specs_file_path_1, create_config_class1, sample_1
+    ):
+        config = create_config_class1.from_specs(
+            specs_file_path_1,
+            source_priority=[ConfigSource.init, ConfigSource.file],
+            **sample_1,
+        )
+        assert config.model_dump() == sample_1
+        assert config.source_priority() == [ConfigSource.init, ConfigSource.file]
+
     def test__from_specs__equivalent_to_kwargs(
         self, specs_file_path_1, create_config_class1, sample_1
     ):
@@ -158,6 +169,36 @@ class TestFromSources:
         assert config.title == "my_app_1"
         assert config.host == "1.1.1.1"
         assert config.port == 8080
+
+    def test__from_sources__with_ignore_missing_files(
+        self, json_config_file_path_1, create_config_class1, sample_1
+    ):
+        config = create_config_class1.from_sources(
+            files=[json_config_file_path_1, "not_exists_from_sources.json"],
+            ignore_missing_files=True,
+        )
+        assert config.model_dump() == sample_1
+
+    def test__from_sources__with_map_field(
+        self,
+        create_config_class4_with_map_field,
+        json_config_map_file_path_4_5,
+        sample_4_with_map_field,
+    ):
+        config = create_config_class4_with_map_field.from_sources(
+            config_map=json_config_map_file_path_4_5,
+            map_field=MAP_FIELD_1,
+            **{MAP_FIELD_1: CONFIG_SAMPLE_1_FIELD_1},
+        )
+        assert config.model_dump() == sample_4_with_map_field
+
+    def test__from_sources__with_specs_path(
+        self, specs_file_path_1, create_config_class1, sample_1
+    ):
+        config = create_config_class1.from_sources(
+            specs_path=specs_file_path_1, **sample_1
+        )
+        assert config.model_dump() == sample_1
 
     def test__from_sources__with_source_priority(
         self, json_config_file_path_1, create_config_class1, sample_1

@@ -39,15 +39,25 @@ class ConfigSpecs(BaseModel):
         path: Path | str,
         class_path: str | Path | None = None,
         creation_path: str | Path | None = None,
+        source_priority: List[ConfigSource] | None = None,
     ) -> ConfigSpecs:
         obj = cls.model_validate_json(Path(path).read_text())
         obj.specs_path = Path(path)
         obj.class_path = Path(class_path) if class_path else obj.class_path
         obj.creation_path = Path(creation_path) if creation_path else obj.creation_path
+        if source_priority is not None:
+            obj.source_priority = source_priority
         return obj
 
     @classmethod
-    def from_model(cls, model, values, class_path=None, creation_path=None):
+    def from_model(
+        cls,
+        model: Any,
+        values: dict[str, Any],
+        class_path: str | Path | None = None,
+        creation_path: str | Path | None = None,
+        source_priority: List[ConfigSource] | None = None,
+    ) -> ConfigSpecs:
         model_config = {
             key: getattr(model, "model_config", {})[key]
             for key in (
@@ -87,10 +97,10 @@ class ConfigSpecs(BaseModel):
             map_field=map_field,
             config_map=values.pop("_config_map", None)
             or model_config.get("config_map"),
-            class_path=class_path,
-            creation_path=creation_path,
+            class_path=Path(class_path) if class_path else None,
+            creation_path=Path(creation_path) if creation_path else None,
             source_priority=(
-                values.pop("_source_priority", None)
+                source_priority
                 or model_config.get("source_priority")
                 or DEFAULT_SOURCE_PRIORITY
             ),

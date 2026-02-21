@@ -45,11 +45,13 @@ class BaseConfig(BaseSettings):
             specs_path = values.pop("_specs_path", None) or config_dict.get(
                 "specs_path"
             )
+            source_priority = values.pop("_source_priority", None)
             if specs_path:
                 specs = ConfigSpecs.from_path(
                     path=specs_path,
                     class_path=subclass_location,
                     creation_path=caller_location,
+                    source_priority=source_priority,
                 )
             else:
                 specs = ConfigSpecs.from_model(
@@ -57,6 +59,7 @@ class BaseConfig(BaseSettings):
                     values=values,
                     class_path=subclass_location,
                     creation_path=caller_location,
+                    source_priority=source_priority,
                 )
 
         loader_manager = LoaderManager(
@@ -170,7 +173,7 @@ class BaseConfig(BaseSettings):
         *,
         files: str | Path | List[str | Path] | None = None,
         ignore_missing_files: bool | None = None,
-        config_map: Path | Dict[str, Any] | None = None,
+        config_map: str | Path | Dict[str, Any] | None = None,
         map_name: str | None = None,
         map_field: str | None = None,
         specs_path: str | Path | None = None,
