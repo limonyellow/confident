@@ -1,0 +1,20 @@
+{
+  "prod": {
+    "host": "myapp",
+    "port": 5000,
+    "log_level": "info",
+    "output_paths": ["S3://bucket_a", "S3://bucket_b", "S3://bucket_c"]
+  },
+  "dev": {
+    "host": "myapp_dev",
+    "port": 5001,
+    "log_level": "info",
+    "output_paths": ["S3://dev_bucket_a", "S3://dev_bucket_b"]
+  },
+  "local": {
+    "host": "localhost",
+    "port": 8000,
+    "log_level": "debug",
+    "output_paths": ["/tmp/local_output"]
+  }
+}

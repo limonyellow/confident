@@ -1,0 +1,5 @@
+title: my_application
+input_paths:
+  - /home/input_a
+  - /home/input_b
+timeout: 60
