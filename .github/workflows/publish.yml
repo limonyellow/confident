@@ -5,10 +5,12 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: pypi
 
     steps:
     - uses: actions/checkout@v4
@@ -17,6 +19,4 @@ jobs:
     - name: Build package
       run: uv build
     - name: Publish package
-      run: uv publish
-      env:
-        UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      run: uv publish --trusted-publishing always
