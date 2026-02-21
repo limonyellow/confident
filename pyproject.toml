@@ -1,0 +1,40 @@
+[project]
+name = "confident"
+version = "2.0.0b1"
+description = "Loading configurations from multiple sources into a data model."
+authors = [{ name = "limonyellow" }]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "pyyaml>=6.0",
+]
+
+[project.urls]
+Repository = "https://github.com/limonyellow/confident"
+Documentation = "https://limonyellow.github.io/confident/"
+
+[dependency-groups]
+dev = [
+    "pytest>=7.1.2",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+    "pre-commit>=3.0",
+    "mkdocs-material>=8.2.15",
+    "mypy>=1.0",
+    "types-PyYAML>=6.0",
+]
+
+[tool.mypy]
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
