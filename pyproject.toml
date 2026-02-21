@@ -1,6 +1,6 @@
 [project]
 name = "confident"
-version = "2.0.0b1"
+version = "2.0.0"
 description = "Loading configurations from multiple sources into a data model."
 authors = [{ name = "limonyellow" }]
 license = "MIT"
