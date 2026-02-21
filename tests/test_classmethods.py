@@ -122,3 +122,49 @@ class TestFromSpecs:
         config_kwargs = create_config_class1(_specs_path=specs_file_path_1, **sample_1)
         assert config_classmethod.model_dump() == config_kwargs.model_dump()
         assert config_classmethod.source_priority() == config_kwargs.source_priority()
+
+
+class TestFromSources:
+    def test__from_sources__with_files(
+        self, json_config_file_path_1, create_config_class1, sample_1
+    ):
+        config = create_config_class1.from_sources(files=json_config_file_path_1)
+        assert config.model_dump() == sample_1
+
+    def test__from_sources__with_map(
+        self, create_config_class4, json_config_map_file_path_4_5, sample_4
+    ):
+        config = create_config_class4.from_sources(
+            config_map=json_config_map_file_path_4_5,
+            map_name=CONFIG_SAMPLE_1_FIELD_1,
+        )
+        assert config.model_dump() == sample_4
+
+    def test__from_sources__with_files_and_map(
+        self, json_config_file_path_1, json_config_map_file_path_4_5
+    ):
+        """Verify from_sources can combine files and config map in a single call."""
+
+        class CombinedConfig(BaseConfig):
+            title: str
+            host: str
+            port: int
+
+        config = CombinedConfig.from_sources(
+            files=json_config_file_path_1,
+            config_map=json_config_map_file_path_4_5,
+            map_name=CONFIG_SAMPLE_1_FIELD_1,
+        )
+        assert config.title == "my_app_1"
+        assert config.host == "1.1.1.1"
+        assert config.port == 8080
+
+    def test__from_sources__with_source_priority(
+        self, json_config_file_path_1, create_config_class1, sample_1
+    ):
+        config = create_config_class1.from_sources(
+            files=json_config_file_path_1,
+            source_priority=[ConfigSource.file, ConfigSource.init],
+        )
+        assert config.model_dump() == sample_1
+        assert config.source_priority() == [ConfigSource.file, ConfigSource.init]

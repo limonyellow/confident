@@ -1,4 +1,4 @@
-from examples import objects_loading_example, config_map_example
+from examples import objects_loading_example, config_map_example, from_sources_example
 
 
 def test__objects_loading_example():
@@ -7,3 +7,7 @@ def test__objects_loading_example():
 
 def test__config_map_example():
     config_map_example.main()
+
+
+def test__from_sources_example():
+    from_sources_example.main()

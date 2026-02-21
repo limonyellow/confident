@@ -8,7 +8,7 @@ import pytest
 
 from confident import BaseConfig, ConfigSource
 from confident.loaders.source_loader_base import SourceLoader
-from confident.utils import get_class_file_path
+from confident.utils import get_class_file_path, convert_field_value
 from tests.conftest import validate_file_not_exists, SPECS_FILE_1_SOURCE_PRIORITY
 
 
@@ -220,6 +220,25 @@ def test__get_class_file_path__no_module_file(import_module_patch, exception):
     cls_path = get_class_file_path(Mock())
     # Assert
     assert cls_path == Path.cwd()
+
+
+@patch("importlib.import_module")
+def test__get_class_file_path__module_file_is_none(import_module_patch):
+    # Arrange
+    type(import_module_patch.return_value).__file__ = PropertyMock(return_value=None)
+    # Act
+    cls_path = get_class_file_path(Mock())
+    # Assert
+    assert cls_path == Path.cwd()
+
+
+def test__convert_field_value__non_json_string(create_config_class1):
+    # Arrange - a plain string that isn't valid JSON, for a non-str field (int)
+    settings = create_config_class1(title="app", host="localhost", port=80)
+    # Act - "not_json" can't be parsed by json.loads, so it falls through
+    result = convert_field_value(settings, "port", "not_json")
+    # Assert - should return the original string unchanged
+    assert result == "not_json"
 
 
 def test__validate_file_not_exists(json_config_file_path_1):
